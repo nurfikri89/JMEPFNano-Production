@@ -87,7 +87,7 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   process.customAK4CHSConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
     candidates = candInputForTable,
     jets = cms.InputTag("finalJets"),
-    name = cms.string("JetPFCand"),
+    name = cms.string("JetCHSPFCand"),
     idx_name = cms.string("pFCandsIdx"),
   )
   process.customizedPFCandsTask.add(process.customAK4CHSConstituentsTable)
@@ -95,7 +95,7 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   process.customAK4PuppiConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
     candidates = candInputForTable,
     jets = cms.InputTag("finalJetsPuppi"),
-    name = cms.string("JetPuppiPFCand"),
+    name = cms.string("JetPFCand"),
     idx_name = cms.string("pFCandsIdx"),
   )
   process.customizedPFCandsTask.add(process.customAK4PuppiConstituentsTable)
