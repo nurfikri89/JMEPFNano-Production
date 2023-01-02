@@ -84,8 +84,8 @@ void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm
 
   auto candTable = std::make_unique<nanoaod::FlatTable>(outCands->size(), name_, false);
   // We fill from here only stuff that cannot be created with the SimpleFlatTableProducer
-  candTable->addColumn<int>(idx_name_, pfcandIdx, "Index in the candidate list", nanoaod::FlatTable::IntColumn);
-  candTable->addColumn<int>("jetIdx", jetIdx_pf, "Index of the parent jet", nanoaod::FlatTable::IntColumn);
+  candTable->addColumn<int>(idx_name_, pfcandIdx, "Index in the candidate list");
+  candTable->addColumn<int>("jetIdx", jetIdx_pf, "Index of the parent jet");
   iEvent.put(std::move(candTable), name_);
   iEvent.put(std::move(outCands));
 }

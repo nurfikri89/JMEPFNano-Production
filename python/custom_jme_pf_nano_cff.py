@@ -53,7 +53,7 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   process.customizedPFCandsTask.add(process.finalJetsConstituents)
   candInputForTable = cms.InputTag("finalJetsConstituents")
 
-  process.customConstituentsExtTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+  process.customPFConstituentsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
   src = candInputForTable,
   cut = cms.string(""), #we should not filter
   name = cms.string("PFCand"),
@@ -61,8 +61,8 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   singleton = cms.bool(False), # the number of entries is variable
   extension = cms.bool(False), # this is the extension table for the AK8 constituents
   variables = cms.PSet(CandVars,
-    puppiWeight = Var("puppiWeight()", float, doc="Puppi weight",precision=10),
-    puppiWeightNoLep = Var("puppiWeightNoLep()", float, doc="Puppi weight removing leptons",precision=10),
+    puppiWeight = Var("puppiWeight()", float, doc="Puppi weight",precision=-1),
+    puppiWeightNoLep = Var("puppiWeightNoLep()", float, doc="Puppi weight removing leptons",precision=-1),
     vtxChi2 = Var("?hasTrackDetails()?vertexChi2():-1", float, doc="vertex chi2",precision=10),
     trkChi2 = Var("?hasTrackDetails()?pseudoTrack().normalizedChi2():-1", float, doc="normalized trk chi2", precision=10),
     dz = Var("?hasTrackDetails()?dz():-1", float, doc="pf dz", precision=10),
@@ -74,7 +74,18 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
     trkQuality = Var("?hasTrackDetails()?pseudoTrack().qualityMask():0", int, doc="track quality mask"),
     )
   )
-  process.customizedPFCandsTask.add(process.customConstituentsExtTable)
+  process.customizedPFCandsTask.add(process.customPFConstituentsTable)
+
+  process.customPFConstituentsExtTable = cms.EDProducer("PFCandidateExtTableProducer",
+    srcPFCandidates = process.customPFConstituentsTable.src,
+    name = process.customPFConstituentsTable.name,
+    srcWeights = cms.InputTag("packedPFCandidatespuppi"),
+    weightName = cms.string("puppiWeightRecomputed"),
+    weightDoc = cms.string("Recomputed Puppi Weights"),
+    weightPrecision = cms.int(process.customPFConstituentsTable.variables.precision),
+  )
+  process.customizedPFCandsTask.add(process.customPFConstituentsExtTable)
+
 
   process.customAK8ConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
     candidates = candInputForTable,
@@ -103,11 +114,12 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   #
   # Switch to AK4 CHS jets for Run-2
   #
-  run2_nanoAOD_ANY.toModify(
-    process.customAK4CHSConstituentsTable, name="JetPFCand"
-  ).toModify(
-    process.customAK4PuppiConstituentsTable, name="JetPuppiPFCand"
-  )
+  # print(run2_nanoAOD_ANY)
+  # run2_nanoAOD_ANY.toModify(
+  #   process.customAK4CHSConstituentsTable, name="JetPFCand"
+  # ).toModify(
+  #   process.customAK4PuppiConstituentsTable, name="JetPuppiPFCand"
+  # )
 
   return process
 
