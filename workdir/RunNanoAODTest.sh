@@ -18,9 +18,12 @@ CUSTOMISE_MC=""
 CUSTOMISE_DATA=""
 
 TAG="customjmepfnano_default"
-
 CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_MC; PrepJMEPFCustomNanoAOD_MC(process)\n"
 CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_Data; PrepJMEPFCustomNanoAOD_Data(process)\n"
+
+# TAG="customjmepfnano_puppiRecompute"
+# CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_MC; PrepJMEPFCustomNanoAOD_MC(process)\n process.packedPFCandidatespuppi.useExistingWeights=False\n"
+# CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_Data; PrepJMEPFCustomNanoAOD_Data(process)\n process.packedPFCandidatespuppi.useExistingWeights=False\n"
 
 # TAG="customjmenano_default"
 # CUSTOMISE_COMMAND_MC="from PhysicsTools.NanoAOD.custom_jme_cff import PrepJMECustomNanoAOD_MC; PrepJMECustomNanoAOD_MC(process)\n"

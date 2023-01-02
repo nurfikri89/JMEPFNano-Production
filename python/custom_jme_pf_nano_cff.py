@@ -133,12 +133,12 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   #
   # Switch to AK4 CHS jets for Run-2
   #
-  # print(run2_nanoAOD_ANY)
-  # run2_nanoAOD_ANY.toModify(
-  #   process.customAK4CHSConstituentsTable, name="JetPFCand"
-  # ).toModify(
-  #   process.customAK4PuppiConstituentsTable, name="JetPuppiPFCand"
-  # )
+  run2_nanoAOD_ANY.toModify(
+    process.customAK4CHSConstituentsTable, name="JetPFCand"
+  )
+  run2_nanoAOD_ANY.toModify(
+    process.customAK4PuppiConstituentsTable, name="JetPuppiPFCand"
+  )
 
   return process
 
