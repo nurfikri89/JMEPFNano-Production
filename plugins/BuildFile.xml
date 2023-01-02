@@ -1,11 +1,13 @@
 <use name="FWCore/Framework"/>
 <use name="FWCore/MessageLogger"/>
 <library file="*.cc" name="JMEPFNanoProductionPlugins">
+  <use name="DataFormats/Common"/>
   <use name="DataFormats/PatCandidates"/>
   <use name="DataFormats/NanoAOD"/>
   <use name="CommonTools/Utils"/>
   <use name="CommonTools/UtilAlgos"/>
   <use name="CommonTools/CandAlgos"/>
+  <use name="PhysicsTools/PatAlgos"/>
   <use name="RecoJets/JetAlgorithms"/>
   <use name="fastjet"/>
   <use name="fastjet-contrib"/>
