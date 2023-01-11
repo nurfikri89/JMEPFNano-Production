@@ -74,6 +74,12 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
     trkQuality = Var("?hasTrackDetails()?pseudoTrack().qualityMask():0", int, doc="track quality mask"),
     )
   )
+  #keep maximum precision for 4-vector
+  process.customPFConstituentsTable.variables.pt.precision = -1 
+  process.customPFConstituentsTable.variables.eta.precision = -1
+  process.customPFConstituentsTable.variables.phi.precision = -1
+  process.customPFConstituentsTable.variables.mass.precision = -1
+
   process.customizedPFCandsTask.add(process.customPFConstituentsTable)
 
   process.customPFConstituentsExtTable = cms.EDProducer("PFCandidateExtTableProducer",
