@@ -1,0 +1,18 @@
+executable    = RunAtBatch.sh
+universe      = vanilla
+output        = BatchLog/Nano.$(SAMPLE).$(ClusterId).$(ProcId).out
+error         = BatchLog/Nano.$(SAMPLE).$(ClusterId).$(ProcId).err
+log           = BatchLog/Nano.$(ClusterId).log
+stream_output = True
+stream_error  = True
+
+#getenv = true
+environment = "HOME=$ENV(HOME) JOBWORKDIR=$ENV(PWD)"
+
+#+JobFlavour   = "espresso"
+#+JobFlavour   = "microcentury"
++JobFlavour   = "longlunch"
+arguments = $(SAMPLE)
+queue SAMPLE  from ( 
+MC22_124_TT
+)
