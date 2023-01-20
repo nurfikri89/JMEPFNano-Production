@@ -2,14 +2,14 @@
 
 SAMPLE=${1}
 
-# NOF_EVENTS=50
-NOF_EVENTS=100
+NOF_EVENTS=50
+# NOF_EVENTS=100
 # NOF_EVENTS=250
 # NOF_EVENTS=500
 # NOF_EVENTS=1000
 # NOF_EVENTS=2000
 # NOF_EVENTS=5000
-# NOF_EVENTS=10000
+NOF_EVENTS=10000
 
 CUSTOMISE_COMMAND_MC=""
 CUSTOMISE_COMMAND_DATA=""
@@ -17,29 +17,35 @@ CUSTOMISE_COMMAND_DATA=""
 CUSTOMISE_MC=""
 CUSTOMISE_DATA=""
 
-TAG="customjmepfnano_default"
+TAG="jmepfnano_default"
 CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_MC; PrepJMEPFCustomNanoAOD_MC(process)\n"
 CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_Data; PrepJMEPFCustomNanoAOD_Data(process)\n"
 
-# TAG="customjmepfnano_puppiRecompute"
+# TAG="jmepfnano_puppiRecompute"
 # CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_MC; PrepJMEPFCustomNanoAOD_MC(process)\n process.packedPFCandidatespuppi.useExistingWeights=False\n"
 # CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_Data; PrepJMEPFCustomNanoAOD_Data(process)\n process.packedPFCandidatespuppi.useExistingWeights=False\n"
 
-# TAG="customjmenano_default"
+# TAG="jmepfnano_jetsFromMini"
+# CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_MC; PrepJMEPFCustomNanoAOD_MC(process)\n"
+# CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_Data; PrepJMEPFCustomNanoAOD_Data(process)\n"
+
+# TAG="jmenano_default"
 # CUSTOMISE_COMMAND_MC="from PhysicsTools.NanoAOD.custom_jme_cff import PrepJMECustomNanoAOD_MC; PrepJMECustomNanoAOD_MC(process)\n"
 # CUSTOMISE_COMMAND_DATA="from PhysicsTools.NanoAOD.custom_jme_cff import PrepJMECustomNanoAOD_Data; PrepJMECustomNanoAOD_Data(process)\n"
 
-mkdir -p ./dir_cfg_${TAG}/
-mkdir -p ./dir_log_${TAG}/
-mkdir -p ./dir_output_${TAG}/
+workspaceDir="./work_${TAG}_${SAMPLE}/"
+mkdir -p ${workspaceDir}
+cd ${workspaceDir}
+
 ############################################
 #
-# Set Global Tag depending on CMSSW version
+# Set Global Tag depending on CMSSW version 
 #
 ############################################
 if [[ $CMSSW_VERSION == *"CMSSW_13_0_"* ]]; then
   echo "Using CMSSW_13_0_X GT"
-  GT_MC_2022="auto:phase1_2022_realistic"
+  GT_MC_2022EE=phase1_2022_realistic_postEE
+  GT_MC_2022=phase1_2022_realistic
   GT_MC_2018=auto:phase1_2018_realistic
   GT_MC_2017=auto:phase1_2017_realistic
   GT_MC_2016=auto:run2_mc
@@ -51,7 +57,8 @@ if [[ $CMSSW_VERSION == *"CMSSW_13_0_"* ]]; then
   GT_DATA_2016APV=auto:run2_data
 elif [[ $CMSSW_VERSION == *"CMSSW_12_6_"* ]]; then
   echo "Using CMSSW_12_6_X GT"
-  GT_MC_2022="auto:phase1_2022_realistic"
+  GT_MC_2022EE=126X_mcRun3_2022_realistic_postEE_v1
+  GT_MC_2022=126X_mcRun3_2022_realistic_v2
   GT_MC_2018=auto:phase1_2018_realistic
   GT_MC_2017=auto:phase1_2017_realistic
   GT_MC_2016=auto:run2_mc
@@ -152,6 +159,20 @@ elif [ $SAMPLE == 'MCUL16APVV2' ]; then
   NANOAOD_CFG=JME-RunIISummer20UL16APVNanoAOD_miniV2_${TAG}_cfg.py
   ERA="Run2_2016_HIPM,run2_nanoAOD_106Xv2"
   LOGFILE="nanoaod_MCUL16APV_miniV2.log"
+
+#######################################
+#
+# UL MC22 126X (NanoAODv11) on Run3Summer22MiniAODv3 (124X)
+#
+########################################
+elif [ $SAMPLE == 'MC22_124_TT' ]; then
+  GT=$GT_MC_2022
+  # /TT_TuneCP5_13p6TeV_powheg-pythia8/Run3Summer22MiniAODv3-124X_mcRun3_2022_realistic_v12-v3/MINIAODSIM
+  MINIAOD=${INFILEPREFIX}"/store/mc/Run3Summer22MiniAODv3/TT_TuneCP5_13p6TeV_powheg-pythia8/MINIAODSIM/124X_mcRun3_2022_realistic_v12-v3/70000/ac3541ad-110b-4273-9827-99298b27dd67.root"
+  NANOAOD="tree_MC22_mini_tt.root"
+  NANOAOD_CFG=JME-Run3Summer22NanoAOD_mini_tt_${TAG}_cfg.py
+  ERA="Run3,run3_nanoAOD_124"
+  LOGFILE="nanoaod_MC22_mini_tt.log"
 #######################################
 #
 # UL MC22
@@ -285,13 +306,13 @@ if [[ (-z $CUSTOMISE_COMMAND_MC) && (-z $CUSTOMISE_COMMAND_DATA) && (-z $CUSTOMI
     echo "Producing a NANOAODSIM file ${NANOAOD} from ${MINIAOD}"
     cmsDriver.py step1 \
     --mc \
-    --fileout file:./dir_output_${TAG}/${NANOAOD} \
+    --fileout file:./${NANOAOD} \
     --eventcontent NANOAODSIM \
     --datatier NANOAODSIM \
     --conditions ${GT} \
     --step NANO \
     --era ${ERA} \
-    --python_filename ./dir_cfg_$TAG/${NANOAOD_CFG} \
+    --python_filename ./${NANOAOD_CFG} \
     --no_exec \
     -n ${NOF_EVENTS} \
     --filein="file:${MINIAOD}"
@@ -299,13 +320,13 @@ if [[ (-z $CUSTOMISE_COMMAND_MC) && (-z $CUSTOMISE_COMMAND_DATA) && (-z $CUSTOMI
     echo "Producing a NANOAOD file ${NANOAOD} from ${MINIAOD}"
     cmsDriver.py step1 \
     --data \
-    --fileout file:./dir_output_${TAG}/${NANOAOD} \
+    --fileout file:./${NANOAOD} \
     --eventcontent NANOAODSIM \
     --datatier NANOAODSIM \
     --conditions ${GT} \
     --step NANO \
     --era ${ERA} \
-    --python_filename ./dir_cfg_${TAG}/${NANOAOD_CFG} \
+    --python_filename ./${NANOAOD_CFG} \
     --no_exec \
     -n ${NOF_EVENTS} \
     --filein="file:${MINIAOD}"
@@ -321,13 +342,13 @@ elif [[ (! -z $CUSTOMISE_MC)  &&  (! -z $CUSTOMISE_DATA) && (! -z $CUSTOMISE_COM
     echo "Producing a NANOAODSIM file ${NANOAOD} from ${MINIAOD}"
     cmsDriver.py step1 \
     --mc \
-    --fileout file:./dir_output_${TAG}/${NANOAOD} \
+    --fileout file:./${NANOAOD} \
     --eventcontent NANOAODSIM \
     --datatier NANOAODSIM \
     --conditions ${GT} \
     --step NANO \
     --era ${ERA} \
-    --python_filename ./dir_cfg_$TAG/${NANOAOD_CFG} \
+    --python_filename ./${NANOAOD_CFG} \
     --no_exec \
     -n ${NOF_EVENTS} \
     --filein="file:${MINIAOD}" \
@@ -337,13 +358,13 @@ elif [[ (! -z $CUSTOMISE_MC)  &&  (! -z $CUSTOMISE_DATA) && (! -z $CUSTOMISE_COM
     echo "Producing a NANOAOD file ${NANOAOD} from ${MINIAOD}"
     cmsDriver.py step1 \
     --data \
-    --fileout file:./dir_output_${TAG}/${NANOAOD} \
+    --fileout file:./${NANOAOD} \
     --eventcontent NANOAODSIM \
     --datatier NANOAODSIM \
     --conditions ${GT} \
     --step NANO \
     --era ${ERA} \
-    --python_filename ./dir_cfg_${TAG}/${NANOAOD_CFG} \
+    --python_filename ./${NANOAOD_CFG} \
     --no_exec \
     -n ${NOF_EVENTS} \
     --filein="file:${MINIAOD}" \
@@ -360,13 +381,13 @@ elif [[ (! -z $CUSTOMISE_MC)  &&  (! -z $CUSTOMISE_DATA) ]]; then
     echo "Producing a NANOAODSIM file ${NANOAOD} from ${MINIAOD}"
     cmsDriver.py step1 \
     --mc \
-    --fileout file:./dir_output_${TAG}/${NANOAOD} \
+    --fileout file:./${NANOAOD} \
     --eventcontent NANOAODSIM \
     --datatier NANOAODSIM \
     --conditions ${GT} \
     --step NANO \
     --era ${ERA} \
-    --python_filename ./dir_cfg_$TAG/${NANOAOD_CFG} \
+    --python_filename ./${NANOAOD_CFG} \
     --no_exec \
     -n ${NOF_EVENTS} \
     --filein="file:${MINIAOD}" \
@@ -375,13 +396,13 @@ elif [[ (! -z $CUSTOMISE_MC)  &&  (! -z $CUSTOMISE_DATA) ]]; then
     echo "Producing a NANOAOD file ${NANOAOD} from ${MINIAOD}"
     cmsDriver.py step1 \
     --data \
-    --fileout file:./dir_output_${TAG}/${NANOAOD} \
+    --fileout file:./${NANOAOD} \
     --eventcontent NANOAODSIM \
     --datatier NANOAODSIM \
     --conditions ${GT} \
     --step NANO \
     --era ${ERA} \
-    --python_filename ./dir_cfg_${TAG}/${NANOAOD_CFG} \
+    --python_filename ./${NANOAOD_CFG} \
     --no_exec \
     -n ${NOF_EVENTS} \
     --filein="file:${MINIAOD}" \
@@ -397,13 +418,13 @@ else
     echo "Producing a NANOAODSIM file ${NANOAOD} from ${MINIAOD}"
     cmsDriver.py step1 \
     --mc \
-    --fileout file:./dir_output_${TAG}/${NANOAOD} \
+    --fileout file:./${NANOAOD} \
     --eventcontent NANOAODSIM \
     --datatier NANOAODSIM \
     --conditions ${GT} \
     --step NANO \
     --era ${ERA} \
-    --python_filename ./dir_cfg_$TAG/${NANOAOD_CFG} \
+    --python_filename ./${NANOAOD_CFG} \
     --no_exec \
     -n ${NOF_EVENTS} \
     --filein="file:${MINIAOD}" \
@@ -412,13 +433,13 @@ else
     echo "Producing a NANOAOD file ${NANOAOD} from ${MINIAOD}"
     cmsDriver.py step1 \
     --data \
-    --fileout file:./dir_output_${TAG}/${NANOAOD} \
+    --fileout file:./${NANOAOD} \
     --eventcontent NANOAODSIM \
     --datatier NANOAODSIM \
     --conditions ${GT} \
     --step NANO \
     --era ${ERA} \
-    --python_filename ./dir_cfg_${TAG}/${NANOAOD_CFG} \
+    --python_filename ./${NANOAOD_CFG} \
     --no_exec \
     -n ${NOF_EVENTS} \
     --filein="file:${MINIAOD}" \
@@ -426,15 +447,17 @@ else
   fi
 fi
 
+JOBREPORT="jobreport_${SAMPLE}_${TAG}.xml"
+
 echo -e "\n\n\n\n"
 echo "cmsRun ${NANOAOD_CFG}"
 echo "Started at `date`"
-cmsRun ./dir_cfg_${TAG}/${NANOAOD_CFG}  2>&1 | tee ./dir_log_${TAG}/${LOGFILE} 
+cmsRun -e -j ${JOBREPORT} ./${NANOAOD_CFG}  2>&1 | tee ./${LOGFILE} 
 echo "Finished at `date`"
 
 # echo -e "\n\n\n\n"
 # echo "cmsRun $NANOAOD_CFG"
 # echo "Started at `date`"
-# igprof -d -t cmsRun -pp -z -o ./dir_log_$TAG/igprof.output_cpu.${SAMPLE}_${TAG}.gz cmsRun ./dir_cfg_$TAG/$NANOAOD_CFG 2>&1 | tee ./dir_log_$TAG/${LOGFILE} 
+# igprof -d -t cmsRun -pp -z -o ./igprof.output_cpu.${SAMPLE}_${TAG}.gz cmsRun ./$NANOAOD_CFG 2>&1 | tee ./dir_log_$TAG/${LOGFILE} 
 # echo "Finished at `date`"
 

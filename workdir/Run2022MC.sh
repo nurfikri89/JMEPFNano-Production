@@ -1,1 +1,1 @@
-./RunNanoAODTest.sh MC22_122_QCD
+./RunNanoAODTest.sh MC22_124_TT
