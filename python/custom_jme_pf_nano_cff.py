@@ -6,6 +6,14 @@ from PhysicsTools.NanoAOD.common_cff import Var, CandVars
 from PhysicsTools.NanoAOD.custom_jme_cff import PrepJMECustomNanoAOD_MC, PrepJMECustomNanoAOD_Data
 from PhysicsTools.NanoAOD.nano_eras_cff import run2_nanoAOD_ANY
 
+from CommonTools.PileupAlgos.Puppi_cff import puppi
+
+from PhysicsTools.PatAlgos.tools.helpers  import getPatAlgosToolsTask, addToProcessAndTask
+def addProcessAndTask(proc, label, module):
+  task = getPatAlgosToolsTask(proc)
+  addToProcessAndTask(label, module, proc, task)
+
+
 def PrepJMEPFCustomNanoAOD(process, runOnMC):
   process.customizedPFCandsTask = cms.Task()
   process.schedule.associate(process.customizedPFCandsTask)
@@ -82,6 +90,21 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
 
   process.customizedPFCandsTask.add(process.customPFConstituentsTable)
 
+  #
+  # NOTE: We setup "packedPFCandidatespuppi" here if not done in JMENano.
+  # Situation where this can happen is when we use slimmedJets and slimmedJetsPuppi
+  # for the input jet collection table
+  #
+  # puppiForJetReclusterInJMENano="packedPFCandidatespuppi"
+  # if not hasattr(process,puppiForJetReclusterInJMENano):
+  #   addProcessAndTask(process, puppiForJetReclusterInJMENano, puppi.clone(
+  #       candName = "packedPFCandidates",
+  #       vertexName = "offlineSlimmedPrimaryVertices",
+  #       clonePackedCands = True,
+  #       useExistingWeights = True,
+  #     )
+  #   )
+
   process.customPFConstituentsExtTable = cms.EDProducer("PFCandidateExtTableProducer",
     srcPFCandidates = process.customPFConstituentsTable.src,
     name = process.customPFConstituentsTable.name,
@@ -93,7 +116,7 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   process.customizedPFCandsTask.add(process.customPFConstituentsExtTable)
 
   #
-  # Use this one if you want to store multiple constituent weights
+  # NOTE: Use this one if you want to store multiple constituent weights
   #
   # process.customPFConstituentsExtTable = cms.EDProducer("PFCandidateExtTableProducerV2",
   #   srcPFCandidates = process.customPFConstituentsTable.src,
@@ -110,7 +133,6 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   #   weightPrecision = process.customPFConstituentsTable.variables.puppiWeight.precision,
   # )
   # process.customizedPFCandsTask.add(process.customPFConstituentsExtTable)
-
 
   process.customAK8ConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
     candidates = candInputForTable,
