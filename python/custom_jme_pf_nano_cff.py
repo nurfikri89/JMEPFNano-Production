@@ -21,7 +21,7 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   #
   #
   #
-  saveOnlyPFCandsInJets = False
+  saveOnlyPFCandsInJets = True
   if saveOnlyPFCandsInJets:
     # Collect AK8 Puppi Constituents pointers
     process.finalJetsAK8Constituents = cms.EDProducer("PatJetConstituentPtrSelector",
