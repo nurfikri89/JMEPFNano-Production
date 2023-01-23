@@ -17,49 +17,48 @@ def addProcessAndTask(proc, label, module):
 def PrepJMEPFCustomNanoAOD(process, runOnMC):
   process.customizedPFCandsTask = cms.Task()
   process.schedule.associate(process.customizedPFCandsTask)
+  
   #
   #
   #
-  process.finalJetsAK8Constituents = cms.EDProducer("PatJetConstituentPtrSelector",
-    src = cms.InputTag("finalJetsAK8"),
-    cut = cms.string("")
-  )
-  process.customizedPFCandsTask.add(process.finalJetsAK8Constituents)
+  saveOnlyPFCandsInJets = False
+  if saveOnlyPFCandsInJets:
+    # Collect AK8 Puppi Constituents pointers
+    process.finalJetsAK8Constituents = cms.EDProducer("PatJetConstituentPtrSelector",
+      src = cms.InputTag("finalJetsAK8"),
+      cut = cms.string("")
+    )
+    process.customizedPFCandsTask.add(process.finalJetsAK8Constituents)
 
-  #
-  #
-  #
-  process.finalJetsAK4CHSConstituents = cms.EDProducer("PatJetConstituentPtrSelector",
-    src = cms.InputTag("finalJets"),
-    cut = cms.string("pt > 8")
-  )
-  process.customizedPFCandsTask.add(process.finalJetsAK4CHSConstituents)
+    # Collect AK4 CHS Constituents pointers
+    process.finalJetsAK4CHSConstituents = cms.EDProducer("PatJetConstituentPtrSelector",
+      src = cms.InputTag("finalJets"),
+      cut = cms.string("pt > 8")
+    )
+    process.customizedPFCandsTask.add(process.finalJetsAK4CHSConstituents)
 
-  #
-  #
-  #
-  process.finalJetsAK4PuppiConstituents = cms.EDProducer("PatJetConstituentPtrSelector",
-    src = cms.InputTag("finalJetsPuppi"),
-    cut = cms.string("pt > 8")
-  )
-  process.customizedPFCandsTask.add(process.finalJetsAK4PuppiConstituents)
-
-  #
-  #
-  #
-  #
-  candList = cms.VInputTag(
-    cms.InputTag("finalJetsAK8Constituents", "constituents"),
-    cms.InputTag("finalJetsAK4CHSConstituents", "constituents"), 
-    cms.InputTag("finalJetsAK4PuppiConstituents", "constituents")
-  )
-  process.finalJetsConstituents = cms.EDProducer("PackedCandidatePtrMerger", 
-    src = candList, 
-    skipNulls = cms.bool(True), 
-    warnOnSkip = cms.bool(True)
-  )
-  process.customizedPFCandsTask.add(process.finalJetsConstituents)
-  candInputForTable = cms.InputTag("finalJetsConstituents")
+    # Collect AK4 Puppi Constituents pointers
+    process.finalJetsAK4PuppiConstituents = cms.EDProducer("PatJetConstituentPtrSelector",
+      src = cms.InputTag("finalJetsPuppi"),
+      cut = cms.string("pt > 8")
+    )
+    process.customizedPFCandsTask.add(process.finalJetsAK4PuppiConstituents)
+    # Merge all the pointers
+    candList = cms.VInputTag(
+      cms.InputTag("finalJetsAK8Constituents", "constituents"),
+      cms.InputTag("finalJetsAK4CHSConstituents", "constituents"), 
+      cms.InputTag("finalJetsAK4PuppiConstituents", "constituents")
+    )
+    process.finalJetsConstituents = cms.EDProducer("PackedCandidatePtrMerger", 
+      src = candList, 
+      skipNulls = cms.bool(True), 
+      warnOnSkip = cms.bool(True)
+    )
+    process.customizedPFCandsTask.add(process.finalJetsConstituents)
+    candInputForTable = cms.InputTag("finalJetsConstituents")
+  else:
+    # NOTE: Store all packedPFCandidates
+    candInputForTable = cms.InputTag("packedPFCandidates")
 
   process.customPFConstituentsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
   src = candInputForTable,
@@ -77,7 +76,9 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
     dzErr = Var("?hasTrackDetails()?dzError():-1", float, doc="pf dz err", precision=15),
     d0 = Var("?hasTrackDetails()?dxy():-1", float, doc="pf d0", precision=15),
     d0Err = Var("?hasTrackDetails()?dxyError():-1", float, doc="pf d0 err", precision=15),
-    pvAssocQuality = Var("pvAssociationQuality()", int, doc="primary vertex association quality"),
+    pvAssocQuality = Var("pvAssociationQuality()", int, doc="primary vertex association quality (NotReconstructedPrimary = 0, OtherDeltaZ = 1, CompatibilityBTag = 4, CompatibilityDz = 5, UsedInFitLoose = 6, UsedInFitTight = 7)"),
+    fromPV0 = Var("fromPV()", int, doc="PV0 association (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)"),
+    vertexRef = Var("?vertexRef().isNonnull()?vertexRef().key():-1", int, doc="vertexRef().key()"),
     lostInnerHits = Var("lostInnerHits()", int, doc="lost inner hits"),
     trkQuality = Var("?hasTrackDetails()?pseudoTrack().qualityMask():0", int, doc="track quality mask"),
     )
@@ -109,8 +110,8 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
     srcPFCandidates = process.customPFConstituentsTable.src,
     name = process.customPFConstituentsTable.name,
     srcWeights = cms.InputTag("packedPFCandidatespuppi"),
-    weightName = cms.string("puppiWeightRecomputed"),
-    weightDoc = cms.string("Recomputed Puppi Weights"),
+    weightName = cms.string("puppiWeightValueMap"),
+    weightDoc = cms.string("Puppi Weight (ValueMap from PuppiProducer)"),
     weightPrecision = process.customPFConstituentsTable.variables.puppiWeight.precision,
   )
   process.customizedPFCandsTask.add(process.customPFConstituentsExtTable)
@@ -135,26 +136,26 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   # process.customizedPFCandsTask.add(process.customPFConstituentsExtTable)
 
   process.customAK8ConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-    candidates = candInputForTable,
+    candidates = process.customPFConstituentsTable.src,
     jets = cms.InputTag("finalJetsAK8"),
     name = cms.string("FatJetPFCand"),
-    idx_name = cms.string("pFCandsIdx"),
+    idx_name = cms.string("pfCandIdx"),
   )
   process.customizedPFCandsTask.add(process.customAK8ConstituentsTable)
 
   process.customAK4CHSConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-    candidates = candInputForTable,
+    candidates = process.customPFConstituentsTable.src,
     jets = cms.InputTag("finalJets"),
     name = cms.string("JetCHSPFCand"),
-    idx_name = cms.string("pFCandsIdx"),
+    idx_name = cms.string("pfCandIdx"),
   )
   process.customizedPFCandsTask.add(process.customAK4CHSConstituentsTable)
 
   process.customAK4PuppiConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-    candidates = candInputForTable,
+    candidates = process.customPFConstituentsTable.src,
     jets = cms.InputTag("finalJetsPuppi"),
     name = cms.string("JetPFCand"),
-    idx_name = cms.string("pFCandsIdx"),
+    idx_name = cms.string("pfCandIdx"),
   )
   process.customizedPFCandsTask.add(process.customAK4PuppiConstituentsTable)
   
