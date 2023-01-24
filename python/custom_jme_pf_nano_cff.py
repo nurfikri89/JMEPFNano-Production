@@ -7,6 +7,7 @@ from PhysicsTools.NanoAOD.custom_jme_cff import PrepJMECustomNanoAOD_MC, PrepJME
 from PhysicsTools.NanoAOD.nano_eras_cff import run2_nanoAOD_ANY
 
 from CommonTools.PileupAlgos.Puppi_cff import puppi
+from CommonTools.ParticleFlow.pfCHS_cff import pfCHS
 
 from PhysicsTools.PatAlgos.tools.helpers  import getPatAlgosToolsTask, addToProcessAndTask
 def addProcessAndTask(proc, label, module):
@@ -19,9 +20,31 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   process.schedule.associate(process.customizedPFCandsTask)
   
   #
+  # NOTE: For CHS studies (new Definition)
+  #
+  # chsCutStr =  '(abs(pdgId)==130 || abs(pdgId)==11 || abs(pdgId)==22 || abs(pdgId)==13 || abs(pdgId)==1 || abs(pdgId)==2) || '
+  # chsCutStr += '((abs(pdgId)==211) && (fromPV(0)>0 || (vertexRef().key<=2 && abs(dz(0))<0.2)))'
+  # process.packedPFCandidateschs.cut = chsCutStr
+
+  #
+  # NOTE: We setup "packedPFCandidatespuppi" here if not done in JMENano.
+  # Situation where this can happen is when we use slimmedJets and slimmedJetsPuppi
+  # for the input jet collection table
+  #
+  # puppiForJetReclusterInJMENano="packedPFCandidatespuppi"
+  # if not hasattr(process,puppiForJetReclusterInJMENano): #jetsFromMini
+  #   addProcessAndTask(process, puppiForJetReclusterInJMENano, puppi.clone(
+  #       candName = "packedPFCandidates",
+  #       vertexName = "offlineSlimmedPrimaryVertices",
+  #       clonePackedCands = True,
+  #       useExistingWeights = True,
+  #     )
+  #  )
+
   #
   #
-  saveOnlyPFCandsInJets = True
+  #
+  saveOnlyPFCandsInJets = False
   if saveOnlyPFCandsInJets:
     # Collect AK8 Puppi Constituents pointers
     process.finalJetsAK8Constituents = cms.EDProducer("PatJetConstituentPtrSelector",
@@ -81,6 +104,8 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
     vertexRef = Var("?vertexRef().isNonnull()?vertexRef().key():-1", int, doc="vertexRef().key()"),
     lostInnerHits = Var("lostInnerHits()", int, doc="lost inner hits"),
     trkQuality = Var("?hasTrackDetails()?pseudoTrack().qualityMask():0", int, doc="track quality mask"),
+    passCHS = Var(process.packedPFCandidateschs.cut.value(), bool, doc=process.packedPFCandidateschs.cut.value()),
+    # passCHS = Var(pfCHS.cut.value(), bool, doc=pfCHS.cut.value()), #jetsFromMini
     )
   )
   #keep maximum precision for 4-vector
@@ -90,21 +115,6 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   process.customPFConstituentsTable.variables.mass.precision = -1
 
   process.customizedPFCandsTask.add(process.customPFConstituentsTable)
-
-  #
-  # NOTE: We setup "packedPFCandidatespuppi" here if not done in JMENano.
-  # Situation where this can happen is when we use slimmedJets and slimmedJetsPuppi
-  # for the input jet collection table
-  #
-  # puppiForJetReclusterInJMENano="packedPFCandidatespuppi"
-  # if not hasattr(process,puppiForJetReclusterInJMENano):
-  #   addProcessAndTask(process, puppiForJetReclusterInJMENano, puppi.clone(
-  #       candName = "packedPFCandidates",
-  #       vertexName = "offlineSlimmedPrimaryVertices",
-  #       clonePackedCands = True,
-  #       useExistingWeights = True,
-  #     )
-  #   )
 
   process.customPFConstituentsExtTable = cms.EDProducer("PFCandidateExtTableProducer",
     srcPFCandidates = process.customPFConstituentsTable.src,
