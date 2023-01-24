@@ -48,45 +48,57 @@ PFCandidateExtTableProducer::PFCandidateExtTableProducer(const edm::ParameterSet
 PFCandidateExtTableProducer::~PFCandidateExtTableProducer() {}
 
 void PFCandidateExtTableProducer::produce(edm::Event &iEvent, const edm::EventSetup &iSetup) {  
+  
   //
-  //
+  // Get packedPFCandidates
   //
   edm::Handle<reco::CandidateView> pfCands;
   iEvent.getByToken(pfcands_token_, pfCands);
+
   //
   // Get Weights Collection
   //
-  edm::ValueMap<float> pfcands_weights;
+  edm::ValueMap<float> pfCands_weights;
   if (!pfcands_weights_token_.isUninitialized())
-    pfcands_weights = iEvent.get(pfcands_weights_token_);
+    pfCands_weights = iEvent.get(pfcands_weights_token_);
+
   //
+  // Define output vectors to store in Table 
   //
+
+  // consituent weights
+  std::vector<float> weightsOutVec;
+  weightsOutVec.reserve(pfCands->size());
+
+  // fromPV(vertexRef)
+  std::vector<int> fromPV_vertexRefOutVec;
+  fromPV_vertexRefOutVec.reserve(pfCands->size());
+  
   //
-  std::vector<edm::Ptr<reco::Candidate>> candPtrs;   
-  candPtrs.reserve(pfCands->size());  
+  // Loop over PF candidate collection
+  //
   for (size_t i = 0; i < pfCands->size(); ++i) {
-    candPtrs.push_back(pfCands->ptrAt(i));
+    reco::CandidatePtr candPtr = pfCands->ptrAt(i);
+    const reco::Candidate* cand = candPtr.get();
+    const pat::PackedCandidate* packedCand = dynamic_cast<const pat::PackedCandidate*>(cand);
+    //
+    // Store 
+    //
+    weightsOutVec.push_back(pfCands_weights[candPtr]);
+
+    int fromPV_vertexRef = -1;
+    if (packedCand->vertexRef().isNonnull())
+      fromPV_vertexRef = packedCand->fromPV(packedCand->vertexRef().key());
+    
+    fromPV_vertexRefOutVec.push_back(fromPV_vertexRef);
   }    
-  //
-  // 
-  //
-  std::vector<float> weightsOut;
-  weightsOut.reserve(pfCands->size());
-  //
-  //
-  //
-  auto inBegin = candPtrs.begin(); 
-  auto inEnd = candPtrs.end(); 
-  auto i = inBegin;
-  for (; i != inEnd; ++i) {
-    weightsOut.push_back(pfcands_weights[*i]);
-  }
 
   //
   //
   //
   auto candTable = std::make_unique<nanoaod::FlatTable>(pfCands->size(), name_, false, true);
-  candTable->addColumn<float>(weightName_, weightsOut, weightDoc_, weightPrecision_);
+  candTable->addColumn<float>(weightName_, weightsOutVec, weightDoc_, weightPrecision_);
+  candTable->addColumn<int>("fromPVvertexRef", fromPV_vertexRefOutVec, "PV(vertexRef) (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)");
   iEvent.put(std::move(candTable), name_);
 }
 
