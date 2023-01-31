@@ -1,5 +1,5 @@
 #
-# First try work with 12_6_X and be compatible for Run-3 and Run-2 samples.
+# Compatible with NanoV11 (CMSSW_12_6_0_patch1). Tested on Run3Summer22MiniAODv3 (CMSSSW_12_4_11_patch3) samples 
 #
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import Var, CandVars
@@ -19,13 +19,6 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   process.customizedPFCandsTask = cms.Task()
   process.schedule.associate(process.customizedPFCandsTask)
   
-  #
-  # NOTE: For CHS studies (new Definition)
-  #
-  # chsCutStr =  '(abs(pdgId)==130 || abs(pdgId)==11 || abs(pdgId)==22 || abs(pdgId)==13 || abs(pdgId)==1 || abs(pdgId)==2) || '
-  # chsCutStr += '((abs(pdgId)==211) && (fromPV(0)>0 || (vertexRef().key<=2 && abs(dz(0))<0.2)))'
-  # process.packedPFCandidateschs.cut = chsCutStr
-
   #
   # NOTE: We setup "packedPFCandidatespuppi" here if not done in JMENano.
   # Situation where this can happen is when we use slimmedJets and slimmedJetsPuppi
@@ -118,6 +111,7 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
 
   process.customPFConstituentsExtTable = cms.EDProducer("PFCandidateExtTableProducer",
     srcPFCandidates = process.customPFConstituentsTable.src,
+    srcPrimaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
     name = process.customPFConstituentsTable.name,
     srcWeights = cms.InputTag("packedPFCandidatespuppi"),
     weightName = cms.string("puppiWeightValueMap"),
@@ -136,10 +130,10 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   #     cms.InputTag("packedPFCandidatespuppi")
   #   ),
   #   weightNamesV = cms.vstring(
-  #     "puppiWeightRecomputed",
+  #     "puppiWeightValueMap",
   #   ),
   #   weightDocsV = cms.vstring(
-  #     "Recomputed Puppi Weights",
+  #     "Puppi Weight (ValueMap from PuppiProducer)",
   #   ),
   #   weightPrecision = process.customPFConstituentsTable.variables.puppiWeight.precision,
   # )
