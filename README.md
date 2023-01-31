@@ -3,8 +3,8 @@
 Setup CMSSW release for the first time
 ```
 mkdir AnaJMEPFNano; cd $_
-cmsrel CMSSW_12_4_11_patch3
-cd CMSSW_12_4_11_patch3/src
+cmsrel CMSSW_12_6_0_patch1
+cd CMSSW_12_6_0_patch1/src
 cmsenv
 ```
 Checkout repository
