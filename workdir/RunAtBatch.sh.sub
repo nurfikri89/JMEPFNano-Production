@@ -15,4 +15,5 @@ environment = "HOME=$ENV(HOME) JOBWORKDIR=$ENV(PWD)"
 arguments = $(SAMPLE)
 queue SAMPLE  from ( 
 MC22_124_TT
+MC22_124_QCD
 )

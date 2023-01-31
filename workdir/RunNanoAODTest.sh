@@ -9,7 +9,7 @@ NOF_EVENTS=50
 # NOF_EVENTS=1000
 # NOF_EVENTS=2000
 # NOF_EVENTS=5000
-NOF_EVENTS=10000
+# NOF_EVENTS=10000
 
 CUSTOMISE_COMMAND_MC=""
 CUSTOMISE_COMMAND_DATA=""
@@ -57,13 +57,13 @@ if [[ $CMSSW_VERSION == *"CMSSW_13_0_"* ]]; then
   GT_DATA_2016APV=auto:run2_data
 elif [[ $CMSSW_VERSION == *"CMSSW_12_6_"* ]]; then
   echo "Using CMSSW_12_6_X GT"
-  GT_MC_2022EE=126X_mcRun3_2022_realistic_postEE_v1
-  GT_MC_2022=126X_mcRun3_2022_realistic_v2
+  GT_MC_2022EE=126X_mcRun3_2022_realistic_postEE_v1 #NanoAODv11 GT
+  GT_MC_2022=126X_mcRun3_2022_realistic_v2 #NanoAODv11 GT
   GT_MC_2018=auto:phase1_2018_realistic
   GT_MC_2017=auto:phase1_2017_realistic
   GT_MC_2016=auto:run2_mc
   GT_MC_2016APV=auto:run2_mc
-  GT_DATA_2022=auto:run3_data
+  GT_DATA_2022=124X_dataRun3_v11
   GT_DATA_2018=auto:run2_data
   GT_DATA_2017=auto:run2_data
   GT_DATA_2016=auto:run2_data
@@ -113,42 +113,42 @@ INFILEPREFIX="/afs/cern.ch/user/n/nbinnorj/work/Samples/Mini"
 if [ $SAMPLE == 'MCUL18V2_QCD' ]; then
   GT=$GT_MC_2018
   MINIAOD=${INFILEPREFIX}"/store/mc/RunIISummer20UL18MiniAODv2/QCD_Pt-15to7000_TuneCP5_Flat2018_13TeV_pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/2530000/62E879B1-359D-E348-B2E8-36568A135395.root"
-  NANOAOD="tree_MCUL18_miniV2_qcd.root"
+  NANOAOD="tree_${TAG}_MCUL18_miniV2_qcd.root"
   NANOAOD_CFG=JME-RunIISummer20UL18NanoAOD_miniV2_${TAG}_cfg.py
   ERA="Run2_2018,run2_nanoAOD_106Xv2"
   LOGFILE="nanoaod_MCUL18_miniV2.log"
 elif [ $SAMPLE == 'MCUL18V2_TTToHadronic' ]; then
   GT=$GT_MC_2018
   MINIAOD=${INFILEPREFIX}"/store/mc/RunIISummer20UL18MiniAODv2/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/100000/1F5F2A97-334A-A249-85D3-9AB5F1268838.root"
-  NANOAOD="tree_MCUL18_miniV2_tthadronic.root"
+  NANOAOD="tree_${TAG}_MCUL18_miniV2_tthadronic.root"
   NANOAOD_CFG=JME-RunIISummer20UL18NanoAOD_miniV2_${TAG}_cfg.py
   ERA="Run2_2018,run2_nanoAOD_106Xv2"
   LOGFILE="nanoaod_MCUL18_miniV2.log"
 elif [ $SAMPLE == 'MCUL18V2_DYJetsToLL' ]; then
   GT=$GT_MC_2018
   MINIAOD=${INFILEPREFIX}"/store/mc/RunIISummer20UL18MiniAODv2/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1_ext1-v1/50000/99327950-C31C-9341-BA87-BAC5C7988F14.root"
-  NANOAOD="tree_MCUL18_miniV2_dyjetstoll.root"
+  NANOAOD="tree_${TAG}_MCUL18_miniV2_dyjetstoll.root"
   NANOAOD_CFG=JME-RunIISummer20UL18NanoAOD_miniV2_${TAG}_cfg.py
   ERA="Run2_2018,run2_nanoAOD_106Xv2"
   LOGFILE="nanoaod_MCUL18_miniV2.log"
 elif [ $SAMPLE == 'MCUL18V2' ]; then
   GT=$GT_MC_2018
   MINIAOD=${INFILEPREFIX}"/store/mc/RunIISummer20UL18MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/270000/F3DBDA07-9E4B-0245-B618-54B67ED34DB4.root"
-  NANOAOD="tree_MCUL18_miniV2_ttjets.root"
+  NANOAOD="tree_${TAG}_MCUL18_miniV2_ttjets.root"
   NANOAOD_CFG=JME-RunIISummer20UL18NanoAOD_miniV2_${TAG}_cfg.py
   ERA="Run2_2018,run2_nanoAOD_106Xv2"
   LOGFILE="nanoaod_MCUL18_miniV2.log"
 elif [ $SAMPLE == 'MCUL17V2' ]; then
   GT=$GT_MC_2017
   MINIAOD=${INFILEPREFIX}"/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120000/C7153D76-622D-C744-9D93-626062F46EFA.root"
-  NANOAOD="tree_MCUL17_miniV2_ttjets.root"
+  NANOAOD="tree_${TAG}_MCUL17_miniV2_ttjets.root"
   NANOAOD_CFG=JME-RunIISummer20UL17NanoAOD_miniV2_${TAG}_cfg.py
   ERA="Run2_2017,run2_nanoAOD_106Xv2"
   LOGFILE="nanoaod_MCUL17_miniV2.log"
 elif [ $SAMPLE == 'MCUL16V2' ]; then
   GT=$GT_MC_2016
   MINIAOD=${INFILEPREFIX}"/store/mc/RunIISummer20UL16MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_v17-v1/30000/BD0D6D63-8B3C-AC4A-8204-D4C2AA1733B5.root"
-  NANOAOD="tree_MCUL16_miniV2_ttjets.root"
+  NANOAOD="tree_${TAG}_MCUL16_miniV2_ttjets.root"
   NANOAOD_CFG=JME-RunIISummer20UL16NanoAOD_miniV2_${TAG}_cfg.py
   ERA="Run2_2016,run2_nanoAOD_106Xv2"
   LOGFILE="nanoaod_MCUL16_miniV2.log"
@@ -159,7 +159,6 @@ elif [ $SAMPLE == 'MCUL16APVV2' ]; then
   NANOAOD_CFG=JME-RunIISummer20UL16APVNanoAOD_miniV2_${TAG}_cfg.py
   ERA="Run2_2016_HIPM,run2_nanoAOD_106Xv2"
   LOGFILE="nanoaod_MCUL16APV_miniV2.log"
-
 #######################################
 #
 # UL MC22 126X (NanoAODv11) on Run3Summer22MiniAODv3 (124X)
@@ -169,10 +168,18 @@ elif [ $SAMPLE == 'MC22_124_TT' ]; then
   GT=$GT_MC_2022
   # /TT_TuneCP5_13p6TeV_powheg-pythia8/Run3Summer22MiniAODv3-124X_mcRun3_2022_realistic_v12-v3/MINIAODSIM
   MINIAOD=${INFILEPREFIX}"/store/mc/Run3Summer22MiniAODv3/TT_TuneCP5_13p6TeV_powheg-pythia8/MINIAODSIM/124X_mcRun3_2022_realistic_v12-v3/70000/ac3541ad-110b-4273-9827-99298b27dd67.root"
-  NANOAOD="tree_MC22_mini_tt.root"
+  NANOAOD="tree_${TAG}_MC22_mini_tt.root"
   NANOAOD_CFG=JME-Run3Summer22NanoAOD_mini_tt_${TAG}_cfg.py
   ERA="Run3,run3_nanoAOD_124"
   LOGFILE="nanoaod_MC22_mini_tt.log"
+elif [ $SAMPLE == 'MC22_124_QCD' ]; then
+  GT=$GT_MC_2022
+  # /QCD_PT-15_TuneCP5_Flat2018_13p6TeV_pythia8/Run3Summer22MiniAODv3-124X_mcRun3_2022_realistic_v12-v2/MINIAODSIM
+  MINIAOD=${INFILEPREFIX}"/store/mc/Run3Summer22MiniAODv3/QCD_PT-15_TuneCP5_Flat2018_13p6TeV_pythia8/MINIAODSIM/124X_mcRun3_2022_realistic_v12-v2/30000/1ad67ce0-b03e-4d8b-ac68-03eb4a32e2ef.root"
+  NANOAOD="tree_${TAG}_MC22_mini_qcd.root"
+  NANOAOD_CFG=JME-Run3Summer22NanoAOD_mini_qcd_${TAG}_cfg.py
+  ERA="Run3,run3_nanoAOD_124"
+  LOGFILE="nanoaod_MC22_mini_qcd.log"
 #######################################
 #
 # UL MC22
@@ -182,7 +189,7 @@ elif [ $SAMPLE == 'MC22_122_QCD' ]; then
   GT=$GT_MC_2022
   # /QCD_Pt-15to7000_TuneCP5_Flat_13p6TeV_pythia8/Run3Winter22MiniAOD-122X_mcRun3_2021_realistic_v9-v2/MINIAODSIM
   MINIAOD=${INFILEPREFIX}"/store/mc/Run3Winter22MiniAOD/QCD_Pt-15to7000_TuneCP5_Flat_13p6TeV_pythia8/MINIAODSIM/122X_mcRun3_2021_realistic_v9-v2/40000/d1e21ec5-4f08-48a6-a471-26b94bcb1a25.root"
-  NANOAOD="tree_MC22_mini_122_qcd.root"
+  NANOAOD="tree_${TAG}_MC22_mini_122_qcd.root"
   NANOAOD_CFG=JME-Run3Winter22NanoAOD_mini_122_qcd_${TAG}_cfg.py
   ERA="Run3,run3_nanoAOD_122"
   LOGFILE="nanoaod_MC22_mini_122_qcd.log"
@@ -190,7 +197,7 @@ elif [ $SAMPLE == 'MC22_122_TTTo2J1L1Nu' ]; then
   GT=$GT_MC_2022
   # /TTTo2J1L1Nu_CP5_13p6TeV_powheg-pythia8/Run3Winter22MiniAOD-122X_mcRun3_2021_realistic_v9-v2/MINIAODSIM
   MINIAOD=${INFILEPREFIX}"/store/mc/Run3Winter22MiniAOD/TTTo2J1L1Nu_CP5_13p6TeV_powheg-pythia8/MINIAODSIM/122X_mcRun3_2021_realistic_v9-v2/2550000/9dad1fae-b379-4ce8-936b-d1872db9c0ce.root"
-  NANOAOD="tree_MC22_mini_122_tt1lep.root"
+  NANOAOD="tree_${TAG}_MC22_mini_122_tt1lep.root"
   NANOAOD_CFG=JME-Run3Winter22NanoAOD_mini_122_tt1lep_${TAG}_cfg.py
   ERA="Run3,run3_nanoAOD_122"
   LOGFILE="nanoaod_MC22_mini_122_tt1lep.log"
