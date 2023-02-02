@@ -15,91 +15,92 @@ def addProcessAndTask(proc, label, module):
   addToProcessAndTask(label, module, proc, task)
 
 
-def PrepJMEPFCustomNanoAOD(process, runOnMC):
-  process.customizedPFCandsTask = cms.Task()
-  process.schedule.associate(process.customizedPFCandsTask)
-  
+def PrepPuppiProducer(process):
   #
   # NOTE: We setup "packedPFCandidatespuppi" here if not done in JMENano.
   # Situation where this can happen is when we use slimmedJets and slimmedJetsPuppi
   # for the input jet collection table
   #
-  # puppiForJetReclusterInJMENano="packedPFCandidatespuppi"
-  # if not hasattr(process,puppiForJetReclusterInJMENano): #jetsFromMini
-  #   addProcessAndTask(process, puppiForJetReclusterInJMENano, puppi.clone(
-  #       candName = "packedPFCandidates",
-  #       vertexName = "offlineSlimmedPrimaryVertices",
-  #       clonePackedCands = True,
-  #       useExistingWeights = True,
-  #     )
-  #  )
+  puppiForJetReclusterInJMENano="packedPFCandidatespuppi"
+  if not hasattr(process,puppiForJetReclusterInJMENano):
+    addProcessAndTask(process, puppiForJetReclusterInJMENano, puppi.clone(
+        candName = "packedPFCandidates",
+        vertexName = "offlineSlimmedPrimaryVertices",
+        clonePackedCands = True,
+        useExistingWeights = True,
+      )
+   )
+  return process
 
-  #
-  #
-  #
-  saveOnlyPFCandsInJets = True
-  if saveOnlyPFCandsInJets:
+
+def PrepJetConstituents(process, doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True):
+  candList = cms.VInputTag()
+
+  if doAK8Puppi:
     # Collect AK8 Puppi Constituents pointers
     process.finalJetsAK8Constituents = cms.EDProducer("PatJetConstituentPtrSelector",
       src = cms.InputTag("finalJetsAK8"),
       cut = cms.string("")
     )
     process.customizedPFCandsTask.add(process.finalJetsAK8Constituents)
+    candList += cms.VInputTag(cms.InputTag("finalJetsAK8Constituents", "constituents"))
 
-    # Collect AK4 CHS Constituents pointers
-    process.finalJetsAK4CHSConstituents = cms.EDProducer("PatJetConstituentPtrSelector",
-      src = cms.InputTag("finalJets"),
-      cut = cms.string("pt > 8")
-    )
-    process.customizedPFCandsTask.add(process.finalJetsAK4CHSConstituents)
-
+  if doAK4Puppi:
     # Collect AK4 Puppi Constituents pointers
     process.finalJetsAK4PuppiConstituents = cms.EDProducer("PatJetConstituentPtrSelector",
       src = cms.InputTag("finalJetsPuppi"),
       cut = cms.string("pt > 8")
     )
     process.customizedPFCandsTask.add(process.finalJetsAK4PuppiConstituents)
-    # Merge all the pointers
-    candList = cms.VInputTag(
-      cms.InputTag("finalJetsAK8Constituents", "constituents"),
-      cms.InputTag("finalJetsAK4CHSConstituents", "constituents"), 
-      cms.InputTag("finalJetsAK4PuppiConstituents", "constituents")
+    candList += cms.VInputTag(cms.InputTag("finalJetsAK4PuppiConstituents", "constituents"))
+
+  if doAK4CHS:
+    # Collect AK4 CHS Constituents pointers
+    process.finalJetsAK4CHSConstituents = cms.EDProducer("PatJetConstituentPtrSelector",
+      src = cms.InputTag("finalJets"),
+      cut = cms.string("pt > 8")
     )
-    process.finalJetsConstituents = cms.EDProducer("PackedCandidatePtrMerger", 
-      src = candList, 
-      skipNulls = cms.bool(True), 
-      warnOnSkip = cms.bool(True)
-    )
-    process.customizedPFCandsTask.add(process.finalJetsConstituents)
-    candInputForTable = cms.InputTag("finalJetsConstituents")
-  else:
-    # NOTE: Store all packedPFCandidates
-    candInputForTable = cms.InputTag("packedPFCandidates")
+    process.customizedPFCandsTask.add(process.finalJetsAK4CHSConstituents)
+    candList += cms.VInputTag(cms.InputTag("finalJetsAK4CHSConstituents", "constituents"))
+
+  return process, candList
+
+
+def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets, doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True):
+
+  docStr = "PF Candidates"
+  if saveOnlyPFCandsInJets:
+    docStrList = []
+    if doAK8Puppi: docStrList += ["AK8Puppi"]
+    if doAK4Puppi: docStrList += ["AK4Puppi"]
+    if doAK4CHS:   docStrList += ["AK4CHS"]
+    docStr += " from following jets: "+",".join(docStrList)
 
   process.customPFConstituentsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
-  src = candInputForTable,
-  cut = cms.string(""), #we should not filter
-  name = cms.string("PFCand"),
-  doc = cms.string("interesting particles from AK4 and AK8 jets"),
-  singleton = cms.bool(False), # the number of entries is variable
-  extension = cms.bool(False), # this is the extension table for the AK8 constituents
-  variables = cms.PSet(CandVars,
-    puppiWeight = Var("puppiWeight()", float, doc="Puppi weight",precision=-1),
-    puppiWeightNoLep = Var("puppiWeightNoLep()", float, doc="Puppi weight removing leptons",precision=-1),
-    vtxChi2 = Var("?hasTrackDetails()?vertexChi2():-1", float, doc="vertex chi2",precision=15),
-    trkChi2 = Var("?hasTrackDetails()?pseudoTrack().normalizedChi2():-1", float, doc="normalized trk chi2", precision=15),
-    dz = Var("?hasTrackDetails()?dz():-1", float, doc="pf dz", precision=15),
-    dzErr = Var("?hasTrackDetails()?dzError():-1", float, doc="pf dz err", precision=15),
-    d0 = Var("?hasTrackDetails()?dxy():-1", float, doc="pf d0", precision=15),
-    d0Err = Var("?hasTrackDetails()?dxyError():-1", float, doc="pf d0 err", precision=15),
-    pvAssocQuality = Var("pvAssociationQuality()", int, doc="primary vertex association quality (NotReconstructedPrimary = 0, OtherDeltaZ = 1, CompatibilityBTag = 4, CompatibilityDz = 5, UsedInFitLoose = 6, UsedInFitTight = 7)"),
-    fromPV0 = Var("fromPV()", int, doc="PV0 association (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)"),
-    vertexRef = Var("?vertexRef().isNonnull()?vertexRef().key():-1", int, doc="vertexRef().key()"),
-    lostInnerHits = Var("lostInnerHits()", int, doc="lost inner hits"),
-    trkQuality = Var("?hasTrackDetails()?pseudoTrack().qualityMask():0", int, doc="track quality mask"),
-    trkHighPurity = Var("trackHighPurity()", bool, doc="is trackHighPurity"),
-    passCHS = Var(process.packedPFCandidateschs.cut.value(), bool, doc=process.packedPFCandidateschs.cut.value()),
-    # passCHS = Var(pfCHS.cut.value(), bool, doc=pfCHS.cut.value()), #jetsFromMini
+    src = candInputForTable,
+    cut = cms.string(""), #we should not filter
+    name = cms.string("PFCand"),
+    doc = cms.string(docStr),
+    singleton = cms.bool(False), # the number of entries is variable
+    extension = cms.bool(False), # this is the extension table for the AK8 constituents
+    variables = cms.PSet(CandVars,
+      puppiWeight = Var("puppiWeight()", float, doc="Puppi weight",precision=-1),
+      puppiWeightNoLep = Var("puppiWeightNoLep()", float, doc="Puppi weight removing leptons",precision=-1),
+      vtxChi2 = Var("?hasTrackDetails()?vertexChi2():-1", float, doc="vertex chi2",precision=15),
+      trkChi2 = Var("?hasTrackDetails()?pseudoTrack().normalizedChi2():-1", float, doc="normalized trk chi2", precision=15),
+      dz = Var("?hasTrackDetails()?dz():-1", float, doc="dz", precision=15),
+      dzErr = Var("?hasTrackDetails()?dzError():-1", float, doc="dz err", precision=15),
+      d0 = Var("?hasTrackDetails()?dxy():-1", float, doc="dxy", precision=15),
+      d0Err = Var("?hasTrackDetails()?dxyError():-1", float, doc="dxy err", precision=15),
+      pvAssocQuality = Var("pvAssociationQuality()", int, doc="primary vertex association quality (NotReconstructedPrimary = 0, OtherDeltaZ = 1, CompatibilityBTag = 4, CompatibilityDz = 5, UsedInFitLoose = 6, UsedInFitTight = 7)"),
+      fromPV0 = Var("fromPV()", int, doc="PV0 association (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)"),
+      vertexRef = Var("?vertexRef().isNonnull()?vertexRef().key():-1", int, doc="vertexRef().key()"),
+      trkQuality = Var("?hasTrackDetails()?pseudoTrack().qualityMask():0", int, doc="track quality mask"),
+      trkHighPurity = Var("trackHighPurity()", bool, doc="is trackHighPurity"),
+      passCHS = Var(pfCHS.cut.value(), bool, doc=pfCHS.cut.value()),
+      nPixelHits = Var("numberOfPixelHits()", int, doc="numberOfPixelHits()"),
+      nHits = Var("numberOfHits()", int, doc="numberOfHits()"),
+      lostInnerHits = Var("lostInnerHits()", int, doc="lostInnerHits()"),
     )
   )
   #keep maximum precision for 4-vector
@@ -140,41 +141,84 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   # )
   # process.customizedPFCandsTask.add(process.customPFConstituentsExtTable)
 
-  process.customAK8ConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-    candidates = process.customPFConstituentsTable.src,
-    jets = cms.InputTag("finalJetsAK8"),
-    name = cms.string("FatJetPFCand"),
-    idx_name = cms.string("pfCandIdx"),
-  )
-  process.customizedPFCandsTask.add(process.customAK8ConstituentsTable)
+  if doAK8Puppi:
+    process.customAK8ConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
+      candidates = process.customPFConstituentsTable.src,
+      jets = cms.InputTag("finalJetsAK8"),
+      name = cms.string("FatJetPFCand"),
+      idx_name = cms.string("pfCandIdx"),
+    )
+    process.customizedPFCandsTask.add(process.customAK8ConstituentsTable)
 
-  process.customAK4CHSConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-    candidates = process.customPFConstituentsTable.src,
-    jets = cms.InputTag("finalJets"),
-    name = cms.string("JetCHSPFCand"),
-    idx_name = cms.string("pfCandIdx"),
-  )
-  process.customizedPFCandsTask.add(process.customAK4CHSConstituentsTable)
+  if doAK4Puppi:
+    process.customAK4PuppiConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
+      candidates = process.customPFConstituentsTable.src,
+      jets = cms.InputTag("finalJetsPuppi"),
+      name = cms.string("JetPFCand"),
+      idx_name = cms.string("pfCandIdx"),
+    )
+    process.customizedPFCandsTask.add(process.customAK4PuppiConstituentsTable)
+    # Switch name for Run-2.
+    run2_nanoAOD_ANY.toModify(
+      process.customAK4PuppiConstituentsTable, name="JetPuppiPFCand"
+    )
 
-  process.customAK4PuppiConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-    candidates = process.customPFConstituentsTable.src,
-    jets = cms.InputTag("finalJetsPuppi"),
-    name = cms.string("JetPFCand"),
-    idx_name = cms.string("pfCandIdx"),
-  )
-  process.customizedPFCandsTask.add(process.customAK4PuppiConstituentsTable)
-  
-  #
-  # Switch to AK4 CHS jets for Run-2
-  #
-  run2_nanoAOD_ANY.toModify(
-    process.customAK4CHSConstituentsTable, name="JetPFCand"
-  )
-  run2_nanoAOD_ANY.toModify(
-    process.customAK4PuppiConstituentsTable, name="JetPuppiPFCand"
-  )
+  if doAK4CHS:
+    process.customAK4CHSConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
+      candidates = process.customPFConstituentsTable.src,
+      jets = cms.InputTag("finalJets"),
+      name = cms.string("JetCHSPFCand"),
+      idx_name = cms.string("pfCandIdx"),
+    )
+    process.customizedPFCandsTask.add(process.customAK4CHSConstituentsTable)
+    # Switch name for Run-2.
+    run2_nanoAOD_ANY.toModify(
+      process.customAK4CHSConstituentsTable, name="JetPFCand"
+    )
 
   return process
+
+
+def PrepJMEPFCustomNanoAOD(process, runOnMC, saveOnlyPFCandsInJets=True):
+  process.customizedPFCandsTask = cms.Task()
+  process.schedule.associate(process.customizedPFCandsTask)
+
+  # process = PrepPuppiProducer(process) #jetsFromMini
+  
+  if saveOnlyPFCandsInJets:
+    process, candList = PrepJetConstituents(
+      process,
+      doAK8Puppi=True,
+      doAK4Puppi=True,
+      doAK4CHS=True
+    )
+    process.finalJetsConstituents = cms.EDProducer("PackedCandidatePtrMerger",
+      src = candList,
+      skipNulls = cms.bool(True),
+      warnOnSkip = cms.bool(True)
+    )
+    process.customizedPFCandsTask.add(process.finalJetsConstituents)
+    candInputForTable = cms.InputTag("finalJetsConstituents")
+  else:
+    # NOTE: Store all packedPFCandidates
+    candInputForTable = cms.InputTag("packedPFCandidates")
+
+  process = PrepJetConstituentTables(
+    process,
+    candInputForTable,
+    saveOnlyPFCandsInJets=True,
+    doAK8Puppi=True,
+    doAK4Puppi=True,
+    doAK4CHS=True
+  )
+  process.customPFConstituentsTable.variables.passCHS.expr = process.packedPFCandidateschs.cut.value()
+  process.customPFConstituentsTable.variables.passCHS.doc = process.packedPFCandidateschs.cut.value()
+
+  if not(saveOnlyPFCandsInJets):
+    process.customPFConstituentsTable.doc = "PF Candidates"
+
+  return process
+
 
 def PrepJMEPFCustomNanoAOD_MC(process):
   PrepJMECustomNanoAOD_MC(process)
@@ -184,4 +228,14 @@ def PrepJMEPFCustomNanoAOD_MC(process):
 def PrepJMEPFCustomNanoAOD_Data(process):
   PrepJMECustomNanoAOD_Data(process)
   PrepJMEPFCustomNanoAOD(process,runOnMC=False)
+  return process
+
+def PrepJMEPFCustomNanoAOD_SavePFAll_MC(process):
+  PrepJMECustomNanoAOD_MC(process)
+  PrepJMEPFCustomNanoAOD(process,runOnMC=True,saveOnlyPFCandsInJets=False)
+  return process
+
+def PrepJMEPFCustomNanoAOD_SavePFAll_Data(process):
+  PrepJMECustomNanoAOD_Data(process)
+  PrepJMEPFCustomNanoAOD(process,runOnMC=False,saveOnlyPFCandsInJets=False)
   return process
