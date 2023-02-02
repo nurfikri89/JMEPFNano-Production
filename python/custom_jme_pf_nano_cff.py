@@ -37,7 +37,7 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
   #
   #
   #
-  saveOnlyPFCandsInJets = False
+  saveOnlyPFCandsInJets = True
   if saveOnlyPFCandsInJets:
     # Collect AK8 Puppi Constituents pointers
     process.finalJetsAK8Constituents = cms.EDProducer("PatJetConstituentPtrSelector",
@@ -97,6 +97,7 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC):
     vertexRef = Var("?vertexRef().isNonnull()?vertexRef().key():-1", int, doc="vertexRef().key()"),
     lostInnerHits = Var("lostInnerHits()", int, doc="lost inner hits"),
     trkQuality = Var("?hasTrackDetails()?pseudoTrack().qualityMask():0", int, doc="track quality mask"),
+    trkHighPurity = Var("trackHighPurity()", bool, doc="is trackHighPurity"),
     passCHS = Var(process.packedPFCandidateschs.cut.value(), bool, doc=process.packedPFCandidateschs.cut.value()),
     # passCHS = Var(pfCHS.cut.value(), bool, doc=pfCHS.cut.value()), #jetsFromMini
     )
