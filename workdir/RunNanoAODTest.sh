@@ -21,13 +21,29 @@ TAG="jmepfnano_default"
 CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_MC; PrepJMEPFCustomNanoAOD_MC(process)\n"
 CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_Data; PrepJMEPFCustomNanoAOD_Data(process)\n"
 
-# TAG="jmepfnano_puppiRecompute"
+# TAG="jmepfnano_default_puppiRecompute"
 # CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_MC; PrepJMEPFCustomNanoAOD_MC(process)\n process.packedPFCandidatespuppi.useExistingWeights=False\n"
 # CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_Data; PrepJMEPFCustomNanoAOD_Data(process)\n process.packedPFCandidatespuppi.useExistingWeights=False\n"
 
-# TAG="jmepfnano_jetsFromMini"
+# TAG="jmepfnano_default_jetsFromMini" #Note: Need to modify PrepJMECustomNanoAOD in custom_jme_cff.py
 # CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_MC; PrepJMEPFCustomNanoAOD_MC(process)\n"
 # CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_Data; PrepJMEPFCustomNanoAOD_Data(process)\n"
+
+# TAG="jmepfnano_allpf"
+# CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_SavePFAll_MC; PrepJMEPFCustomNanoAOD_SavePFAll_MC(process)\n"
+# CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_SavePFAll_Data; PrepJMEPFCustomNanoAOD_SavePFAll_Data(process)\n"
+
+# TAG="pfnano_default"
+# CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_pf_nano_cff import PrepPFNanoAOD_MC; PrepPFNanoAOD_MC(process)\n"
+# CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_pf_nano_cff import PrepPFNanoAOD_Data; PrepPFNanoAOD_Data(process)\n"
+
+# TAG="pfnano_ak8only"
+# CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_pf_nano_cff import PrepPFNanoAOD_SavePFAK8Only_MC; PrepPFNanoAOD_SavePFAK8Only_MC(process)\n"
+# CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_pf_nano_cff import PrepPFNanoAOD_SavePFAK8Only_Data; PrepPFNanoAOD_SavePFAK8Only_Data(process)\n"
+
+# TAG="pfnano_allpf"
+# CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_pf_nano_cff import PrepPFNanoAOD_SavePFAll_MC; PrepPFNanoAOD_SavePFAll_MC(process)\n"
+# CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_pf_nano_cff import PrepPFNanoAOD_SavePFAll_Data; PrepPFNanoAOD_SavePFAll_Data(process)\n"
 
 # TAG="jmenano_default"
 # CUSTOMISE_COMMAND_MC="from PhysicsTools.NanoAOD.custom_jme_cff import PrepJMECustomNanoAOD_MC; PrepJMECustomNanoAOD_MC(process)\n"
