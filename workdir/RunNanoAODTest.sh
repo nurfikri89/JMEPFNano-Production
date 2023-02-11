@@ -2,7 +2,8 @@
 
 SAMPLE=${1}
 
-NOF_EVENTS=50
+NOF_EVENTS=10
+# NOF_EVENTS=50
 # NOF_EVENTS=100
 # NOF_EVENTS=250
 # NOF_EVENTS=500
@@ -22,8 +23,22 @@ CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import Pr
 CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_Data; PrepJMEPFCustomNanoAOD_Data(process)\n"
 
 # TAG="jmepfnano_default_puppiRecompute"
-# CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_MC; PrepJMEPFCustomNanoAOD_MC(process)\n process.packedPFCandidatespuppi.useExistingWeights=False\n"
-# CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_Data; PrepJMEPFCustomNanoAOD_Data(process)\n process.packedPFCandidatespuppi.useExistingWeights=False\n"
+# CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_MC; PrepJMEPFCustomNanoAOD_MC(process)\n "
+# CUSTOMISE_COMMAND_DATA="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_Data; PrepJMEPFCustomNanoAOD_Data(process)\n "
+# CUSTOMISE_COMMAND_MC+="process.packedPFCandidatespuppi.useExistingWeights=False\n "
+# CUSTOMISE_COMMAND_DATA+="process.packedPFCandidatespuppi.useExistingWeights=False\n "
+#### CUSTOMISE_COMMAND_MC+="process.pfDeepFlavourTagInfosAK4PFCHSFinal.puppi_value_map='packedPFCandidatespuppi'\n "
+#### CUSTOMISE_COMMAND_MC+="process.pfDeepFlavourTagInfosAK4PFPUPPIFinal.puppi_value_map='packedPFCandidatespuppi'\n "
+#### CUSTOMISE_COMMAND_DATA+="process.pfDeepFlavourTagInfosAK4PFCHSFinal.puppi_value_map='packedPFCandidatespuppi'\n "
+#### CUSTOMISE_COMMAND_DATA+="process.pfDeepFlavourTagInfosAK4PFPUPPIFinal.puppi_value_map='packedPFCandidatespuppi'\n "
+#### CUSTOMISE_COMMAND_MC+="process.pfParticleNetAK4TagInfosAK4PFCHSFinal.puppi_value_map='packedPFCandidatespuppi'\n "
+#### CUSTOMISE_COMMAND_MC+="process.pfParticleNetAK4TagInfosAK4PFPUPPIFinal.puppi_value_map='packedPFCandidatespuppi'\n "
+#### CUSTOMISE_COMMAND_DATA+="process.pfParticleNetAK4TagInfosAK4PFCHSFinal.puppi_value_map='packedPFCandidatespuppi'\n "
+#### CUSTOMISE_COMMAND_DATA+="process.pfParticleNetAK4TagInfosAK4PFPUPPIFinal.puppi_value_map='packedPFCandidatespuppi'\n "
+#### CUSTOMISE_COMMAND_MC+="process.pfInclusiveSecondaryVertexFinderTagInfosAK4PFCHSFinal.weights='packedPFCandidatespuppi'\n "
+#### CUSTOMISE_COMMAND_MC+="process.pfInclusiveSecondaryVertexFinderTagInfosAK4PFPUPPIFinal.weights='packedPFCandidatespuppi'\n "
+#### CUSTOMISE_COMMAND_DATA+="process.pfInclusiveSecondaryVertexFinderTagInfosAK4PFCHSFinal.weights='packedPFCandidatespuppi'\n "
+#### CUSTOMISE_COMMAND_DATA+="process.pfInclusiveSecondaryVertexFinderTagInfosAK4PFPUPPIFinal.weights='packedPFCandidatespuppi'\n "
 
 # TAG="jmepfnano_default_jetsFromMini" #Note: Need to modify PrepJMECustomNanoAOD in custom_jme_cff.py
 # CUSTOMISE_COMMAND_MC="from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJMEPFCustomNanoAOD_MC; PrepJMEPFCustomNanoAOD_MC(process)\n"
@@ -60,8 +75,8 @@ cd ${workspaceDir}
 ############################################
 if [[ $CMSSW_VERSION == *"CMSSW_13_0_"* ]]; then
   echo "Using CMSSW_13_0_X GT"
-  GT_MC_2022EE=phase1_2022_realistic_postEE
-  GT_MC_2022=phase1_2022_realistic
+  GT_MC_2022EE=auto:phase1_2022_realistic_postEE
+  GT_MC_2022=auto:phase1_2022_realistic
   GT_MC_2018=auto:phase1_2018_realistic
   GT_MC_2017=auto:phase1_2017_realistic
   GT_MC_2016=auto:run2_mc
