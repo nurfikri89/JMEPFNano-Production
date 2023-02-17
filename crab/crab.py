@@ -21,12 +21,12 @@ reqNamePrefix = "JMEPFNano"
 #
 # Set version number (CHECK)
 #
-version = "v1p0"
+version = "v2p0"
 #
 # Change this PATH where the crab directories are stored
 # Example: config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects/'
 #
-crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_9/'
+crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects/'
 #
 crab_config.JobType.pluginName = 'Analysis'
 
@@ -115,7 +115,7 @@ for i, dataset in enumerate(samplelist):
   #
   isData = helpers.IsSampleData(dataset)
   if isData:
-    crab_config.JobType.psetName  = 'configs/%s/CustomJMEPFNano_DataUL18_cfg.py'%(version)
+    crab_config.JobType.psetName  = 'configs/%s/CustomJMEPFNano_Data22_cfg.py'%(version)
     crab_config.JobType.maxJobRuntimeMin = runTime_data
     crab_config.Data.unitsPerJob = fileSplit_data
     # Have to make unique requestName.
@@ -124,7 +124,7 @@ for i, dataset in enumerate(samplelist):
     primaryName   = dataset.split('/')[1]
     secondaryName = helpers.TrimSecondaryNameForData(dataset)
   else:
-    crab_config.JobType.psetName  = 'configs/%s/CustomJMEPFNano_MCUL18_cfg.py'%(version)
+    crab_config.JobType.psetName  = 'configs/%s/CustomJMEPFNano_MC22_cfg.py'%(version)
     crab_config.JobType.maxJobRuntimeMin = runTime_mc 
     crab_config.Data.unitsPerJob = fileSplit_mc
     #

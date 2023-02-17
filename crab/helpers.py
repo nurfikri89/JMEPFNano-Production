@@ -25,6 +25,8 @@ def TrimSecondaryNameForMC(dataset):
   name = dataset.split('/')[2]
   name = name.replace("RunIISummer20UL18MiniAODv2-","MCUL18MiniAODv2")#RENAME CAMPAIGN.
   name = name.replace("106X_upgrade2018_realistic_v16_L1v1","") #REMOVE GT.
+  name = name.replace("Run3Summer22MiniAODv3-","MC22MiniAODv3")#RENAME CAMPAIGN.
+  name = name.replace("124X_mcRun3_2022_realistic_v12","") #REMOVE GT.
   name = name.replace("-v1","")# 
   name = name.replace("-v2","")# 
   name = name.replace("-v3","")#
