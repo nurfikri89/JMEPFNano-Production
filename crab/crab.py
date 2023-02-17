@@ -124,7 +124,10 @@ for i, dataset in enumerate(samplelist):
     primaryName   = dataset.split('/')[1]
     secondaryName = helpers.TrimSecondaryNameForData(dataset)
   else:
-    crab_config.JobType.psetName  = 'configs/%s/CustomJMEPFNano_MC22_cfg.py'%(version)
+    if "Run3Summer22MiniAODv3" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s/CustomJMEPFNano_MC22_cfg.py'%(version)
+    elif "Run3Summer22EEMiniAODv3" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s/CustomJMEPFNano_MC22EE_cfg.py'%(version)
     crab_config.JobType.maxJobRuntimeMin = runTime_mc 
     crab_config.Data.unitsPerJob = fileSplit_mc
     #
