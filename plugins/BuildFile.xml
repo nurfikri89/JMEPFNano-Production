@@ -3,6 +3,7 @@
 <library file="*.cc" name="JMEPFNanoProductionPlugins">
   <use name="DataFormats/Common"/>
   <use name="DataFormats/PatCandidates"/>
+  <use name="DataFormats/ParticleFlowCandidate"/>
   <use name="DataFormats/NanoAOD"/>
   <use name="DataFormats/VertexReco"/>
   <use name="CommonTools/Utils"/>

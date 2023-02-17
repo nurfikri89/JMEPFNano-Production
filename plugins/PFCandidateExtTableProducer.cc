@@ -11,6 +11,7 @@
 
 #include "DataFormats/Common/interface/ValueMap.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/Candidate/interface/CandidateFwd.h"
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
 
@@ -114,6 +115,7 @@ void PFCandidateExtTableProducer::produce(edm::Event &iEvent, const edm::EventSe
     reco::CandidatePtr candPtr = pfCands->ptrAt(i);
     const reco::Candidate* cand = candPtr.get();
     const pat::PackedCandidate* packedCand = dynamic_cast<const pat::PackedCandidate*>(cand);
+    // const reco::PFCandidate* recoCand = dynamic_cast<const reco::PFCandidate*>(cand);
     //
     // Store 
     //
