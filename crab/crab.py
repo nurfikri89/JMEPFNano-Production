@@ -21,7 +21,7 @@ reqNamePrefix = "JMEPFNano"
 #
 # Set version number (CHECK)
 #
-version = "v2p0"
+version = "v2p0_PuppiV17"
 #
 # Change this PATH where the crab directories are stored
 # Example: config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects/'
@@ -38,7 +38,7 @@ crab_config.JobType.allowUndistributedCMSSW = True
 # Specify the outLFNDirBase and your storage site
 # JetMET CMS EOS space at CERN
 #
-crab_config.Data.outLFNDirBase  = '/store/group/phys_jetmet/nbinnorj/'+reqNamePrefix+'_'+version+'/CRABOUTPUT/'
+crab_config.Data.outLFNDirBase  = '/store/group/phys_jetmet/'+reqNamePrefix+'_'+version+'/CRABOUTPUT/'
 crab_config.Site.storageSite    = 'T2_CH_CERN'
 #
 #
@@ -147,4 +147,3 @@ for i, dataset in enumerate(samplelist):
   # print(crab_config.Data.lumiMask)
   crabCommand('submit', config = crab_config)
   print("")
-
