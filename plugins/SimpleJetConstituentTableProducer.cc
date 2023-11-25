@@ -9,6 +9,7 @@
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 
 #include "DataFormats/Candidate/interface/CandidateFwd.h"
 
@@ -66,7 +67,7 @@ void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm
   for (unsigned i_jet = 0; i_jet < jets->size(); ++i_jet) {
     const auto &jet = jets->at(i_jet);
 
-    // PF Cands    
+    // PF Cands
     std::vector<reco::CandidatePtr> const & daughters = jet.daughterPtrVector();
 
     for (const auto &cand : daughters) {
@@ -79,7 +80,7 @@ void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm
       outCands->push_back(cand);
       jetIdx_pf.push_back(i_jet);
       pfcandIdx.push_back(candInNewList - candPtrs.begin());
-    }  
+    }
   }// end jet loop
 
   auto candTable = std::make_unique<nanoaod::FlatTable>(outCands->size(), name_, false);
@@ -101,4 +102,7 @@ void SimpleJetConstituentTableProducer<T>::fillDescriptions(edm::ConfigurationDe
 }
 
 typedef SimpleJetConstituentTableProducer<pat::Jet> SimplePatJetConstituentTableProducer;
+typedef SimpleJetConstituentTableProducer<reco::GenJet> SimpleGenJetConstituentTableProducer;
+
 DEFINE_FWK_MODULE(SimplePatJetConstituentTableProducer);
+DEFINE_FWK_MODULE(SimpleGenJetConstituentTableProducer);
