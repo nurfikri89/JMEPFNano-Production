@@ -25,7 +25,7 @@ public:
 private:
   void produce(edm::Event &, const edm::EventSetup &) override;
   float computedZ0ForPuIdVarBeta(const pat::PackedCandidate*, const reco::Vertex*, const reco::VertexCollection&);
-  
+
   const edm::EDGetTokenT<reco::CandidateView> pfcands_token_;
   const edm::EDGetTokenT<reco::VertexCollection> primaryvertices_token_;
   const std::string name_;
@@ -47,14 +47,13 @@ PFCandidateExtTableProducer::PFCandidateExtTableProducer(const edm::ParameterSet
   weightName_(iConfig.getParameter<std::string>("weightName")),
   weightDoc_(iConfig.getParameter<std::string>("weightDoc")),
   weightPrecision_(iConfig.getParameter<int>("weightPrecision"))
-{ 
+{
   produces<nanoaod::FlatTable>(name_);
 }
 
 PFCandidateExtTableProducer::~PFCandidateExtTableProducer() {}
 
-void PFCandidateExtTableProducer::produce(edm::Event &iEvent, const edm::EventSetup &iSetup) {  
-  
+void PFCandidateExtTableProducer::produce(edm::Event &iEvent, const edm::EventSetup &iSetup) {
   //
   // Get packedPFCandidates
   //
@@ -68,22 +67,21 @@ void PFCandidateExtTableProducer::produce(edm::Event &iEvent, const edm::EventSe
   const reco::VertexCollection* vertexes = nullptr;
   reco::VertexCollection::const_iterator vtx;
 
-
-  bool calcPuIdVarBeta=true;
-  if (calcPuIdVarBeta){
-    //
-    // https://github.com/cms-sw/cmssw/blob/CMSSW_12_6_0_patch1/RecoJets/JetProducers/plugins/PileupJetIdProducer.cc#L100-L113
-    //
-    iEvent.getByToken(primaryvertices_token_, primaryVertices);
-    vertexes = primaryVertices.product();
-    vtx = vertexes->begin();
-    while (vtx != vertexes->end() && (vtx->isFake() || vtx->ndof() < 4)) {
-      ++vtx;
-    }
-    if (vtx == vertexes->end()) {
-      vtx = vertexes->begin();
-    }
-  }
+  // bool calcPuIdVarBeta=true;
+  // if (calcPuIdVarBeta){
+  //   //
+  //   // https://github.com/cms-sw/cmssw/blob/CMSSW_12_6_0_patch1/RecoJets/JetProducers/plugins/PileupJetIdProducer.cc#L100-L113
+  //   //
+  //   iEvent.getByToken(primaryvertices_token_, primaryVertices);
+  //   vertexes = primaryVertices.product();
+  //   vtx = vertexes->begin();
+  //   while (vtx != vertexes->end() && (vtx->isFake() || vtx->ndof() < 4)) {
+  //     ++vtx;
+  //   }
+  //   if (vtx == vertexes->end()) {
+  //     vtx = vertexes->begin();
+  //   }
+  // }
 
   //
   // Get Weights Collection
@@ -93,7 +91,7 @@ void PFCandidateExtTableProducer::produce(edm::Event &iEvent, const edm::EventSe
     pfCands_weights = iEvent.get(pfcands_weights_token_);
 
   //
-  // Define output vectors to store in Table 
+  // Define output vectors to store in Table
   //
 
   // consituent weights
@@ -101,13 +99,13 @@ void PFCandidateExtTableProducer::produce(edm::Event &iEvent, const edm::EventSe
   weightsOutVec.reserve(pfCands->size());
 
   // fromPV(vertexRef)
-  std::vector<int> fromPV_vertexRefOutVec;
-  fromPV_vertexRefOutVec.reserve(pfCands->size());
+  // std::vector<int> fromPV_vertexRefOutVec;
+  // fromPV_vertexRefOutVec.reserve(pfCands->size());
 
   // dZ0ForPuIdVarBetaVec
-  std::vector<float> dZ0ForPuIdVarBetaVec;
-  dZ0ForPuIdVarBetaVec.reserve(pfCands->size());
-  
+  // std::vector<float> dZ0ForPuIdVarBetaVec;
+  // dZ0ForPuIdVarBetaVec.reserve(pfCands->size());
+
   //
   // Loop over PF candidate collection
   //
@@ -117,35 +115,35 @@ void PFCandidateExtTableProducer::produce(edm::Event &iEvent, const edm::EventSe
     const pat::PackedCandidate* packedCand = dynamic_cast<const pat::PackedCandidate*>(cand);
     // const reco::PFCandidate* recoCand = dynamic_cast<const reco::PFCandidate*>(cand);
     //
-    // Store 
+    // Store weights
     //
     weightsOutVec.push_back(pfCands_weights[candPtr]);
     //
     //
     //
-    int fromPV_vertexRef = -1;
-    if (packedCand->vertexRef().isNonnull())
-      fromPV_vertexRef = packedCand->fromPV(packedCand->vertexRef().key());
-    fromPV_vertexRefOutVec.push_back(fromPV_vertexRef);
+    // int fromPV_vertexRef = -1;
+    // if (packedCand->vertexRef().isNonnull())
+    //   fromPV_vertexRef = packedCand->fromPV(packedCand->vertexRef().key());
+    // fromPV_vertexRefOutVec.push_back(fromPV_vertexRef);
     //
     //
     //
-    float dZ0ForPuIdVarBeta = -99.;
-    if (calcPuIdVarBeta and cand->charge() != 0) {
-      dZ0ForPuIdVarBeta = computedZ0ForPuIdVarBeta(packedCand, &(*vtx), *vertexes);
-    }
-    dZ0ForPuIdVarBetaVec.push_back(dZ0ForPuIdVarBeta);
-  }    
+    // float dZ0ForPuIdVarBeta = -99.;
+    // if (calcPuIdVarBeta and cand->charge() != 0) {
+    //   dZ0ForPuIdVarBeta = computedZ0ForPuIdVarBeta(packedCand, &(*vtx), *vertexes);
+    // }
+    // dZ0ForPuIdVarBetaVec.push_back(dZ0ForPuIdVarBeta);
+  }
 
   //
   //
   //
   auto candTable = std::make_unique<nanoaod::FlatTable>(pfCands->size(), name_, false, true);
   candTable->addColumn<float>(weightName_, weightsOutVec, weightDoc_, weightPrecision_);
-  candTable->addColumn<int>("fromPVvertexRef", fromPV_vertexRefOutVec, "PV(vertexRef) (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)");
-  if (calcPuIdVarBeta){
-    candTable->addColumn<float>("dZ0ForPuIdVarBeta", dZ0ForPuIdVarBetaVec, "dZ0 (For PuId Variable Beta)", 15);
-  }
+  // candTable->addColumn<int>("fromPVvertexRef", fromPV_vertexRefOutVec, "PV(vertexRef) (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)");
+  // if (calcPuIdVarBeta){
+  //   candTable->addColumn<float>("dZ0ForPuIdVarBeta", dZ0ForPuIdVarBetaVec, "dZ0 (For PuId Variable Beta)", 15);
+  // }
   iEvent.put(std::move(candTable), name_);
 }
 //
