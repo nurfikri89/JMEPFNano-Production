@@ -35,6 +35,8 @@ private:
   edm::EDGetTokenT<edm::View<T>> jet_token_;
   edm::EDGetTokenT<reco::CandidateView> cand_token_;
 
+  const StringCutObjectSelector<T> jetCut_;
+
   edm::Handle<reco::CandidateView> cands_;
 };
 
@@ -46,7 +48,8 @@ SimpleJetConstituentTableProducer<T>::SimpleJetConstituentTableProducer(const ed
   name_(iConfig.getParameter<std::string>("name")),
   idx_name_(iConfig.getParameter<std::string>("idx_name")),
   jet_token_(consumes<edm::View<T>>(iConfig.getParameter<edm::InputTag>("jets"))),
-  cand_token_(consumes<reco::CandidateView>(iConfig.getParameter<edm::InputTag>("candidates")))
+  cand_token_(consumes<reco::CandidateView>(iConfig.getParameter<edm::InputTag>("candidates"))),
+  jetCut_(iConfig.getParameter<std::string>("jetCut"))
 {
   produces<nanoaod::FlatTable>(name_);
   produces<std::vector<reco::CandidatePtr>>();
@@ -62,16 +65,20 @@ void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm
   std::vector<int> jetIdx_pf, pfcandIdx;
 
   auto jets = iEvent.getHandle(jet_token_);
+
   iEvent.getByToken(cand_token_, cands_);
+  auto candPtrs = cands_->ptrs();
 
   for (unsigned i_jet = 0; i_jet < jets->size(); ++i_jet) {
     const auto &jet = jets->at(i_jet);
+
+    bool pass = jetCut_(jet);
+    if (!pass) continue;
 
     // PF Cands
     std::vector<reco::CandidatePtr> const & daughters = jet.daughterPtrVector();
 
     for (const auto &cand : daughters) {
-      auto candPtrs = cands_->ptrs();
       auto candInNewList = std::find( candPtrs.begin(), candPtrs.end(), cand );
       if ( candInNewList == candPtrs.end() ) {
         //std::cout << "Cannot find candidate : " << cand.id() << ", " << cand.key() << ", pt = " << cand->pt() << std::endl;
@@ -98,6 +105,7 @@ void SimpleJetConstituentTableProducer<T>::fillDescriptions(edm::ConfigurationDe
   desc.add<std::string>("idx_name", "candIdx");
   desc.add<edm::InputTag>("jets", edm::InputTag("slimmedJets"));
   desc.add<edm::InputTag>("candidates", edm::InputTag("packedPFCandidates"));
+  desc.add<std::string>("jetCut", "");
   descriptions.addWithDefaultLabel(desc);
 }
 
