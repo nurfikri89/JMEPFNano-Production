@@ -1,20 +1,19 @@
 #
-# Compatible with NanoV11 (CMSSW_12_6_0_patch1). Tested on Run3Summer22MiniAODv3 (CMSSSW_12_4_11_patch3) samples 
+# Compatible with NanoV12 and JMENanoV12p5. Tested with MiniAODv4 using CMSSW_13_2_6_patch2
 #
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import Var, CandVars
 from PhysicsTools.NanoAOD.nano_eras_cff import run2_nanoAOD_ANY
 
-from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepPuppiProducer
+from PhysicsTools.PatAlgos.tools.jetTools import setupPuppiForPackedPF
+
 from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJetConstituents
 from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepJetConstituentTables
 from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepGenJetConstituents
 from JMEPFNano.Production.custom_jme_pf_nano_cff import PrepGenJetConstituentTables
 
 def PrepPFNanoAOD(process, runOnMC, saveAK4=True,
-  saveOnlyPFCandsInJets=True,
-  saveGenJetCands=False,
-  saveOnlyGenCandsInJets=True):
+  saveOnlyPFCandsInJets=True,saveGenJetCands=False,saveOnlyGenCandsInJets=True,saveAK8Subjets=False):
   process.customizedJetCandsTask = cms.Task()
   process.schedule.associate(process.customizedJetCandsTask)
 
@@ -23,7 +22,7 @@ def PrepPFNanoAOD(process, runOnMC, saveAK4=True,
   # Reco-jets and PF candidates
   #
   ###################################
-  process = PrepPuppiProducer(process)
+  packedPuppi, packedPuppiNoLep = setupPuppiForPackedPF(process)
 
   #
   # Switch from Run-3 to Run-2 default jet collection
@@ -44,7 +43,7 @@ def PrepPFNanoAOD(process, runOnMC, saveAK4=True,
       doAK8Puppi=True,
       doAK4Puppi=jetAK4Switch.doAK4Puppi and saveAK4,
       doAK4CHS=jetAK4Switch.doAK4CHS and saveAK4,
-      doAK8PuppiSubjets=True
+      doAK8PuppiSubjets=saveAK8Subjets
     )
     process.finalJetsConstituents = cms.EDProducer("PackedCandidatePtrMerger",
       src = candList,
@@ -64,7 +63,7 @@ def PrepPFNanoAOD(process, runOnMC, saveAK4=True,
     doAK8Puppi=True,
     doAK4Puppi=jetAK4Switch.doAK4Puppi and saveAK4,
     doAK4CHS=jetAK4Switch.doAK4CHS and saveAK4,
-    doAK8PuppiSubjets=True
+    doAK8PuppiSubjets=saveAK8Subjets
   )
 
   if not(saveOnlyPFCandsInJets):
@@ -82,7 +81,8 @@ def PrepPFNanoAOD(process, runOnMC, saveAK4=True,
       process, genCandList = PrepGenJetConstituents(
         process,
         doAK8=True,
-        doAK4=True
+        doAK4=True,
+        doAK8Subjets=saveAK8Subjets
       )
       process.finalGenJetsConstituents = cms.EDProducer("PackedGenParticlePtrMerger",
         src = genCandList,
@@ -101,6 +101,7 @@ def PrepPFNanoAOD(process, runOnMC, saveAK4=True,
       saveOnlyGenCandsInJets=saveOnlyGenCandsInJets,
       doAK8=True,
       doAK4=True,
+      doAK8Subjets=saveAK8Subjets
     )
     if not(saveOnlyGenCandsInJets):
       process.customGenConstituentsTable.doc = "Particle-level Gen Candidates"
@@ -108,30 +109,30 @@ def PrepPFNanoAOD(process, runOnMC, saveAK4=True,
   return process
 
 def PrepPFNanoAOD_MC(process):
-  PrepPFNanoAOD(process,runOnMC=True)
+  process = PrepPFNanoAOD(process,runOnMC=True)
   return process
 
 def PrepPFNanoAOD_SaveGenJetCands_MC(process):
-  PrepPFNanoAOD(process,runOnMC=True,saveGenJetCands=True,saveOnlyGenCandsInJets=True)
+  process = PrepPFNanoAOD(process,runOnMC=True,saveGenJetCands=True,saveOnlyGenCandsInJets=True)
   return process
 
 def PrepPFNanoAOD_Data(process):
-  PrepPFNanoAOD(process,runOnMC=False)
+  process = PrepPFNanoAOD(process,runOnMC=False)
   return process
 
 def PrepPFNanoAOD_SavePFAK8Only_MC(process):
-  PrepPFNanoAOD(process,runOnMC=True,saveAK4=False)
+  process = PrepPFNanoAOD(process,runOnMC=True,saveAK4=False)
   return process
 
 def PrepPFNanoAOD_SavePFAK8Only_Data(process):
-  PrepPFNanoAOD(process,runOnMC=False,saveAK4=False)
+  process = PrepPFNanoAOD(process,runOnMC=False,saveAK4=False)
   return process
 
 def PrepPFNanoAOD_SavePFAll_MC(process):
-  PrepPFNanoAOD(process,runOnMC=True,saveAK4=True,saveOnlyPFCandsInJets=False)
+  process = PrepPFNanoAOD(process,runOnMC=True,saveAK4=True,saveOnlyPFCandsInJets=False)
   return process
 
 def PrepPFNanoAOD_SavePFAll_Data(process):
-  PrepPFNanoAOD(process,runOnMC=False,saveAK4=True,saveOnlyPFCandsInJets=False)
+  process = PrepPFNanoAOD(process,runOnMC=False,saveAK4=True,saveOnlyPFCandsInJets=False)
   return process
 

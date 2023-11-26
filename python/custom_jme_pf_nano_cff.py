@@ -1,5 +1,5 @@
 #
-# Compatible with NanoV11 (CMSSW_12_6_0_patch1). Tested on Run3Summer22MiniAODv3 (CMSSSW_12_4_11_patch3) samples 
+# Compatible with NanoV12 and JMENanoV12p5. Tested with MiniAODv4 using CMSSW_13_2_6_patch2
 #
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import Var, CandVars
@@ -9,34 +9,20 @@ from PhysicsTools.NanoAOD.nano_eras_cff import run2_nanoAOD_ANY
 from CommonTools.PileupAlgos.Puppi_cff import puppi
 from CommonTools.ParticleFlow.pfCHS_cff import pfCHS
 
+from PhysicsTools.PatAlgos.tools.jetTools import setupPuppiForPackedPF
+
 from PhysicsTools.PatAlgos.tools.helpers  import getPatAlgosToolsTask, addToProcessAndTask
 def addProcessAndTask(proc, label, module):
   task = getPatAlgosToolsTask(proc)
   addToProcessAndTask(label, module, proc, task)
-
-def PrepPuppiProducer(process):
-  #
-  # NOTE: We setup "packedPFCandidatespuppi" here if not done in JMENano.
-  # Situation where this can happen is when we use slimmedJets and slimmedJetsPuppi
-  # for the input jet collection table
-  #
-  puppiForJetReclusterInJMENano="packedPFCandidatespuppi"
-  if not hasattr(process,puppiForJetReclusterInJMENano):
-    addProcessAndTask(process, puppiForJetReclusterInJMENano, puppi.clone(
-        candName = "packedPFCandidates",
-        vertexName = "offlineSlimmedPrimaryVertices",
-        clonePackedCands = True,
-        useExistingWeights = True,
-      )
-   )
-  return process
 
 #####################################################################
 #
 #
 #
 ######################################################################
-def PrepJetConstituents(process, doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True, doAK8PuppiSubjets=True):
+def PrepJetConstituents(process,
+  doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True, doAK8PuppiSubjets=False):
   candList = cms.VInputTag()
 
   if doAK8Puppi:
@@ -77,8 +63,8 @@ def PrepJetConstituents(process, doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True
 
   return process, candList
 
-def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets, 
-  doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True, doAK8PuppiSubjets=True):
+def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
+  doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True, doAK8PuppiSubjets=False):
 
   docStr = "PF Candidates"
   if saveOnlyPFCandsInJets:
@@ -127,7 +113,7 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
     srcPFCandidates = process.customPFConstituentsTable.src,
     srcPrimaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
     name = process.customPFConstituentsTable.name,
-    srcWeights = cms.InputTag("packedPFCandidatespuppi"),
+    srcWeights = cms.InputTag("packedpuppi"),
     weightName = cms.string("puppiWeightValueMap"),
     weightDoc = cms.string("Puppi Weight (ValueMap from PuppiProducer)"),
     weightPrecision = process.customPFConstituentsTable.variables.puppiWeight.precision,
@@ -141,7 +127,7 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
   #   srcPFCandidates = process.customPFConstituentsTable.src,
   #   name = process.customPFConstituentsTable.name,
   #   srcWeightsV = cms.VInputTag(
-  #     cms.InputTag("packedPFCandidatespuppi")
+  #     cms.InputTag("packedpuppi")
   #   ),
   #   weightNamesV = cms.vstring(
   #     "puppiWeightValueMap",
@@ -155,28 +141,31 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
 
   if doAK8Puppi:
     process.customAK8ConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-      candidates = process.customPFConstituentsTable.src,
-      jets = cms.InputTag("finalJetsAK8"),
       name = cms.string("FatJetPFCand"),
       idx_name = cms.string("PFCandIdx"),
+      jets = cms.InputTag("finalJetsAK8"),
+      candidates = process.customPFConstituentsTable.src,
+      jetCut = cms.string("") # No need to apply cut here.
     )
     process.customizedJetCandsTask.add(process.customAK8ConstituentsTable)
 
   if doAK8PuppiSubjets:
     process.customAK8SubjetConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-      candidates = process.customPFConstituentsTable.src,
-      jets = cms.InputTag("slimmedJetsAK8PFPuppiSoftDropPacked","SubJets"),
       name = cms.string("SubJetPFCand"),
       idx_name = cms.string("PFCandIdx"),
+      jets = cms.InputTag("slimmedJetsAK8PFPuppiSoftDropPacked","SubJets"),
+      candidates = process.customPFConstituentsTable.src,
+      jetCut = cms.string("") # No need to apply cut here.
     )
     process.customizedJetCandsTask.add(process.customAK8SubjetConstituentsTable)
 
   if doAK4Puppi:
     process.customAK4PuppiConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-      candidates = process.customPFConstituentsTable.src,
-      jets = cms.InputTag("finalJetsPuppi"),
       name = cms.string("JetPFCand"),
       idx_name = cms.string("PFCandIdx"),
+      jets = cms.InputTag("finalJetsPuppi"),
+      candidates = process.customPFConstituentsTable.src,
+      jetCut = cms.string("") # No need to apply cut here.
     )
     process.customizedJetCandsTask.add(process.customAK4PuppiConstituentsTable)
     # Switch name for Run-2.
@@ -186,10 +175,11 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
 
   if doAK4CHS:
     process.customAK4CHSConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-      candidates = process.customPFConstituentsTable.src,
-      jets = cms.InputTag("finalJets"),
       name = cms.string("JetCHSPFCand"),
       idx_name = cms.string("PFCandIdx"),
+      jets = cms.InputTag("finalJets"),
+      candidates = process.customPFConstituentsTable.src,
+      jetCut = cms.string("") # No need to apply cut here.
     )
     process.customizedJetCandsTask.add(process.customAK4CHSConstituentsTable)
     # Switch name for Run-2.
@@ -199,7 +189,8 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
 
   return process
 
-def PrepGenJetConstituents(process, doAK8=True, doAK4=True, doAK8Subjets=True):
+def PrepGenJetConstituents(process,
+  doAK8=True, doAK4=True, doAK8Subjets=False):
   candList = cms.VInputTag()
 
   if doAK8:
@@ -231,9 +222,10 @@ def PrepGenJetConstituents(process, doAK8=True, doAK4=True, doAK8Subjets=True):
 
   return process, candList
 
-def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJets, doAK8=True, doAK4=True, doAK8Subjets=True):
+def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJets,
+  doAK8=True, doAK4=True, doAK8Subjets=False):
 
-  docStr = "Particle-level Gen Candidates"
+  docStr = "Particle-level (i.e status==1) Gen Candidates"
   if saveOnlyGenCandsInJets:
     docStrList = []
     if doAK8: docStrList += ["AK8Gen"]
@@ -244,16 +236,22 @@ def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJe
   process.customGenConstituentsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     src = candInputForTable,
     cut = cms.string(""), #we should not filter
-    name = cms.string("GenCand"),
+    name = cms.string("GenPartCand"),
     doc = cms.string(docStr),
     singleton = cms.bool(False), # the number of entries is variable
     extension = cms.bool(False), # this is the extension table for the AK8 constituents
     variables = cms.PSet(CandVars,
-      statusFlags = process.genParticleTable.variables.statusFlags,
+      # statusFlags = process.genParticleTable.variables.statusFlags, # We don't need this
     )
   )
   process.customGenConstituentsTable.variables.pdgId = Var("pdgId()", int, doc="pdgId from MC truth")
   process.customizedJetCandsTask.add(process.customGenConstituentsTable)
+
+  # process.customGenParticleConstituentsExtTable = cms.EDProducer("GenParticleCandidateExtTableProducer",
+  #   srcGenPartCandidates = process.customGenConstituentsTable.src,
+  #   name = process.customGenConstituentsTable.name,
+  # )
+  # process.customizedJetCandsTask.add(process.customGenParticleConstituentsExtTable)
 
   #keep maximum precision for 4-vector
   process.customGenConstituentsTable.variables.pt.precision = -1
@@ -263,36 +261,37 @@ def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJe
 
   if doAK8:
     process.customAK8GenConstituentsTable = cms.EDProducer("SimpleGenJetConstituentTableProducer",
-      candidates = process.customGenConstituentsTable.src,
+      name = cms.string("GenJetAK8GenPartCand"),
+      idx_name = cms.string("GenPartCandIdx"),
       jets = process.genJetAK8Table.src,
-      name = cms.string("GenJetAK8Cand"),
-      idx_name = cms.string("GenCandIdx"),
+      candidates = process.customGenConstituentsTable.src,
+      jetCut = process.genJetAK8Table.cut
     )
     process.customizedJetCandsTask.add(process.customAK8GenConstituentsTable)
 
   if doAK8Subjets:
     process.customAK8SubJetGenConstituentsTable = cms.EDProducer("SimpleGenJetConstituentTableProducer",
-      candidates = process.customGenConstituentsTable.src,
+      name = cms.string("SubGenJetAK8GenPartCand"),
+      idx_name = cms.string("GenPartCandIdx"),
       jets = process.genSubJetAK8Table.src,
-      name = cms.string("SubGenJetAK8Cand"),
-      idx_name = cms.string("GenCandIdx"),
+      candidates = process.customGenConstituentsTable.src,
+      jetCut = process.genSubJetAK8Table.cut
     )
     process.customizedJetCandsTask.add(process.customAK8SubJetGenConstituentsTable)
 
   if doAK4:
     process.customAK4GenConstituentsTable = cms.EDProducer("SimpleGenJetConstituentTableProducer",
-      candidates = process.customGenConstituentsTable.src,
+      name = cms.string("GenJetGenPartCand"),
+      idx_name = cms.string("GenPartCandIdx"),
       jets = process.genJetTable.src,
-      name = cms.string("GenJetCand"),
-      idx_name = cms.string("GenCandIdx"),
+      candidates = process.customGenConstituentsTable.src,
+      jetCut = process.genJetTable.cut
     )
     process.customizedJetCandsTask.add(process.customAK4GenConstituentsTable)
 
-def PrepJMEPFCustomNanoAOD(process, runOnMC, saveOnlyPFCandsInJets=True, saveGenJetCands=False, saveOnlyGenCandsInJets=True):
+def PrepJMEPFCustomNanoAOD(process, runOnMC, saveOnlyPFCandsInJets=True, saveGenJetCands=False, saveOnlyGenCandsInJets=True, saveAK8Subjets=False):
   process.customizedJetCandsTask = cms.Task()
   process.schedule.associate(process.customizedJetCandsTask)
-
-  # process = PrepPuppiProducer(process) #jetsFromMini
 
   ###################################
   #
@@ -304,7 +303,8 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC, saveOnlyPFCandsInJets=True, saveGen
       process,
       doAK8Puppi=True,
       doAK4Puppi=True,
-      doAK4CHS=True
+      doAK4CHS=True,
+      doAK8PuppiSubjets=saveAK8Subjets
     )
     process.finalJetsConstituents = cms.EDProducer("PackedCandidatePtrMerger",
       src = candList,
@@ -323,7 +323,8 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC, saveOnlyPFCandsInJets=True, saveGen
     saveOnlyPFCandsInJets=saveOnlyGenCandsInJets,
     doAK8Puppi=True,
     doAK4Puppi=True,
-    doAK4CHS=True
+    doAK4CHS=True,
+    doAK8PuppiSubjets=saveAK8Subjets
   )
   process.customPFConstituentsTable.variables.passCHS.expr = process.packedPFCandidateschs.cut.value()
   process.customPFConstituentsTable.variables.passCHS.doc = process.packedPFCandidateschs.cut.value()
@@ -342,7 +343,8 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC, saveOnlyPFCandsInJets=True, saveGen
       process, genCandList = PrepGenJetConstituents(
         process,
         doAK8=True,
-        doAK4=True
+        doAK4=True,
+        doAK8Subjets=saveAK8Subjets
       )
       process.finalGenJetsConstituents = cms.EDProducer("PackedGenParticlePtrMerger",
         src = genCandList,
@@ -361,6 +363,7 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC, saveOnlyPFCandsInJets=True, saveGen
       saveOnlyGenCandsInJets=saveOnlyGenCandsInJets,
       doAK8=True,
       doAK4=True,
+      doAK8Subjets=saveAK8Subjets
     )
     if not(saveOnlyGenCandsInJets):
       process.customGenConstituentsTable.doc = "Particle-level Gen Candidates"
@@ -368,26 +371,45 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC, saveOnlyPFCandsInJets=True, saveGen
   return process
 
 def PrepJMEPFCustomNanoAOD_MC(process):
-  PrepJMECustomNanoAOD_MC(process)
-  PrepJMEPFCustomNanoAOD(process,runOnMC=True)
+  process = PrepJMECustomNanoAOD_MC(process)
+  # Fix for NanAODv12_JMENano12p5. To be fixed in future JMENano
+  process.jetMCTable.variables.genJetIdx = Var("?genJetFwdRef().backRef().isNonnull()?genJetFwdRef().backRef().key():-1", "int16", doc="index of matched gen jet")
+  # Undo this cut removal in future JMENano.
+  process.genJetAK8Table.cut = "pt > 100." # Revert back to 100.
+  process.genJetAK8FlavourTable.cut = process.genJetAK8Table.cut
+  #
+  process = PrepJMEPFCustomNanoAOD(process,runOnMC=True)
+
   return process
 
 def PrepJMEPFCustomNanoAOD_SaveGenJetCands_MC(process):
-  PrepJMECustomNanoAOD_MC(process)
-  PrepJMEPFCustomNanoAOD(process,runOnMC=True,saveGenJetCands=True,saveOnlyGenCandsInJets=True)
+  process = PrepJMECustomNanoAOD_MC(process)
+  # Fix for NanAODv12_JMENano12p5. To be fixed in future JMENano
+  process.jetMCTable.variables.genJetIdx = Var("?genJetFwdRef().backRef().isNonnull()?genJetFwdRef().backRef().key():-1", "int16", doc="index of matched gen jet")
+  # Undo this cut removal in future JMENano.
+  process.genJetAK8Table.cut = "pt > 100." # Revert back to 100.
+  process.genJetAK8FlavourTable.cut = process.genJetAK8Table.cut
+  #
+  process = PrepJMEPFCustomNanoAOD(process,runOnMC=True,saveGenJetCands=True,saveOnlyGenCandsInJets=True)
   return process
 
 def PrepJMEPFCustomNanoAOD_Data(process):
-  PrepJMECustomNanoAOD_Data(process)
-  PrepJMEPFCustomNanoAOD(process,runOnMC=False)
+  process = PrepJMECustomNanoAOD_Data(process)
+  process = PrepJMEPFCustomNanoAOD(process,runOnMC=False)
   return process
 
 def PrepJMEPFCustomNanoAOD_SavePFAll_MC(process):
-  PrepJMECustomNanoAOD_MC(process)
-  PrepJMEPFCustomNanoAOD(process,runOnMC=True,saveOnlyPFCandsInJets=False)
+  process = PrepJMECustomNanoAOD_MC(process)
+  # Fix for NanAODv12_JMENano12p5. To be fixed in future JMENano
+  process.jetMCTable.variables.genJetIdx = Var("?genJetFwdRef().backRef().isNonnull()?genJetFwdRef().backRef().key():-1", "int16", doc="index of matched gen jet")
+  # Undo this cut removal in future JMENano.
+  process.genJetAK8Table.cut = "pt > 100." # Revert back to 100.
+  process.genJetAK8FlavourTable.cut = process.genJetAK8Table.cut
+  #
+  process = PrepJMEPFCustomNanoAOD(process,runOnMC=True,saveOnlyPFCandsInJets=False)
   return process
 
 def PrepJMEPFCustomNanoAOD_SavePFAll_Data(process):
-  PrepJMECustomNanoAOD_Data(process)
-  PrepJMEPFCustomNanoAOD(process,runOnMC=False,saveOnlyPFCandsInJets=False)
+  process = PrepJMECustomNanoAOD_Data(process)
+  process = PrepJMEPFCustomNanoAOD(process,runOnMC=False,saveOnlyPFCandsInJets=False)
   return process
