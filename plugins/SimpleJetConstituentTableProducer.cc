@@ -27,9 +27,7 @@ public:
 private:
   void produce(edm::Event &, const edm::EventSetup &) override;
 
-  //const std::string name_;
   const std::string name_;
-  const std::string nameSV_;
   const std::string idx_name_;
 
   edm::EDGetTokenT<edm::View<T>> jet_token_;
@@ -69,15 +67,26 @@ void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm
   iEvent.getByToken(cand_token_, cands_);
   auto candPtrs = cands_->ptrs();
 
+  //
+  // Select jets first
+  //
+  std::vector<T> jetsPassCut;
   for (unsigned i_jet = 0; i_jet < jets->size(); ++i_jet) {
     const auto &jet = jets->at(i_jet);
+    if (!jetCut_(jet)) continue;
+    jetsPassCut.push_back(jets->at(i_jet));
+  }
 
-    bool pass = jetCut_(jet);
-    if (!pass) continue;
+  //
+  // Then loop over selected jets
+  //
+  for (unsigned i_jet = 0; i_jet < jetsPassCut.size(); ++i_jet) {
+    const auto &jet = jetsPassCut.at(i_jet);
 
-    // PF Cands
+    //
+    // Loop over jet constituents
+    //
     std::vector<reco::CandidatePtr> const & daughters = jet.daughterPtrVector();
-
     for (const auto &cand : daughters) {
       auto candInNewList = std::find( candPtrs.begin(), candPtrs.end(), cand );
       if ( candInNewList == candPtrs.end() ) {
@@ -88,12 +97,21 @@ void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm
       jetIdx_pf.push_back(i_jet);
       pfcandIdx.push_back(candInNewList - candPtrs.begin());
     }
+
   }// end jet loop
 
   auto candTable = std::make_unique<nanoaod::FlatTable>(outCands->size(), name_, false);
   // We fill from here only stuff that cannot be created with the SimpleFlatTableProducer
   candTable->addColumn<int>(idx_name_, pfcandIdx, "Index in the candidate list");
-  candTable->addColumn<int>("jetIdx", jetIdx_pf, "Index of the parent jet");
+
+  std::string jetIdxName("jetIdx");
+  std::string jetIdxDoc("Index of the parent jet");
+  if constexpr (std::is_same<T,reco::GenJet>::value){
+    jetIdxName = "genJetIdx";
+    jetIdxDoc = "Index of the parent gen jet";
+  }
+  candTable->addColumn<int>(jetIdxName, jetIdx_pf, jetIdxDoc);
+
   iEvent.put(std::move(candTable), name_);
   iEvent.put(std::move(outCands));
 }
