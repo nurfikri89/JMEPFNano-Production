@@ -36,11 +36,11 @@ private:
 //
 // constructors and destructor
 //
-PFCandidateExtTableProducerV2::PFCandidateExtTableProducerV2(const edm::ParameterSet &iConfig): 
+PFCandidateExtTableProducerV2::PFCandidateExtTableProducerV2(const edm::ParameterSet &iConfig):
   pfcands_token_(consumes<reco::CandidateView>(iConfig.getParameter<edm::InputTag>("srcPFCandidates"))),
   name_(iConfig.getParameter<std::string>("name")),
   weightPrecision_(iConfig.getParameter<int>("weightPrecision"))
-{ 
+{
   v_pfcands_weights_tokens_ = edm::vector_transform(
     iConfig.getParameter<std::vector<edm::InputTag>>("srcWeightsV"),
     [this](edm::InputTag const& tag) {return consumes<edm::ValueMap<float>>(tag);}
@@ -53,7 +53,7 @@ PFCandidateExtTableProducerV2::PFCandidateExtTableProducerV2(const edm::Paramete
 
 PFCandidateExtTableProducerV2::~PFCandidateExtTableProducerV2() {}
 
-void PFCandidateExtTableProducerV2::produce(edm::Event &iEvent, const edm::EventSetup &iSetup) {  
+void PFCandidateExtTableProducerV2::produce(edm::Event &iEvent, const edm::EventSetup &iSetup) {
 
   //
   // Retrieve pf candidates
@@ -72,14 +72,14 @@ void PFCandidateExtTableProducerV2::produce(edm::Event &iEvent, const edm::Event
   //
   //
   //
-  std::vector<edm::Ptr<reco::Candidate>> candPtrs;   
-  candPtrs.reserve(pfCands->size());  
+  std::vector<edm::Ptr<reco::Candidate>> candPtrs;
+  candPtrs.reserve(pfCands->size());
   for (size_t iCand = 0; iCand < pfCands->size(); ++iCand) {
     candPtrs.push_back(pfCands->ptrAt(iCand));
-  }    
+  }
 
   //
-  // 
+  //
   //
   std::vector<std::vector<float>> v_v_weightsOut;
   v_v_weightsOut.reserve(v_pfcands_weights.size());
@@ -100,7 +100,7 @@ void PFCandidateExtTableProducerV2::produce(edm::Event &iEvent, const edm::Event
     for (size_t iW = 0; iW < v_pfcands_weights.size(); ++iW) {
       v_v_weightsOut[iW].push_back(v_pfcands_weights[iW][candPtr]);
     }
-  }    
+  }
 
   //
   //
