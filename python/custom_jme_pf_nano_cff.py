@@ -139,11 +139,59 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
   # )
   # process.customizedJetCandsTask.add(process.customPFConstituentsExtTable)
 
+  ############################################################
+  #
+  # Experimental Feature START
+  #
+  ############################################################
+  # jetsList = []
+  # jetIdxNamesList = []
+  # jetIdxDocsList = []
+  # jetCutList = []
+  # if doAK8Puppi:
+  #   jetsList += [process.fatJetTable.src.value()]
+  #   jetIdxNamesList += [process.fatJetTable.name.value()]
+  #   jetIdxDocsList += [f"Index of the parent jet in {process.fatJetTable.name.value()}"]
+  #   jetCutList += [""]
+  # if doAK8PuppiSubjets:
+  #   jetsList += [process.subJetTable.src.value()]
+  #   jetIdxNamesList += [process.subJetTable.name.value()]
+  #   jetIdxDocsList += [f"Index of the parent jet in {process.subJetTable.name.value()}"]
+  #   jetCutList += [""]
+  # if doAK4Puppi:
+  #   jetsList += [process.jetPuppiTable.src.value()]
+  #   jetIdxNamesList += [process.jetPuppiTable.name.value()]
+  #   jetIdxDocsList += [f"Index of the parent jet in {process.jetPuppiTable.name.value()}"]
+  #   jetCutList += [""]
+  # if doAK4CHS:
+  #   jetsList += [process.jetTable.src.value()]
+  #   jetIdxNamesList += [process.jetTable.name.value()]
+  #   jetIdxDocsList += [f"Index of the parent jet in {process.jetTable.name.value()}"]
+  #   jetCutList += [""]
+
+  # process.customPFConstituentsJetIdxExtTable = cms.EDProducer("CandidatePatJetIdxExtTableProducer",
+  #   name = process.customPFConstituentsTable.name,
+  #   candidates = process.customPFConstituentsTable.src,
+  #   jetsV = cms.VInputTag(jetsList),
+  #   jetIdxNamesV = cms.vstring(jetIdxNamesList),
+  #   jetIdxDocsV = cms.vstring(jetIdxDocsList),
+  #   jetCutV = cms.vstring(jetCutList),
+  # )
+  # process.customizedJetCandsTask.add(process.customPFConstituentsJetIdxExtTable)
+  ############################################################
+  #
+  # Experimental Feature END
+  #
+  ############################################################
+  candIdxName="PFCandIdx"
+  #
+  #
+  #
   if doAK8Puppi:
     process.customAK8ConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-      name = cms.string("FatJetPFCand"),
-      idx_name = cms.string("PFCandIdx"),
-      jets = cms.InputTag("finalJetsAK8"),
+      name = cms.string(f"{process.fatJetTable.name.value()}PFCand"),
+      idx_name = cms.string(candIdxName),
+      jets = process.fatJetTable.src,
       candidates = process.customPFConstituentsTable.src,
       jetCut = cms.string("") # No need to apply cut here.
     )
@@ -151,9 +199,9 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
 
   if doAK8PuppiSubjets:
     process.customAK8SubjetConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-      name = cms.string("SubJetPFCand"),
-      idx_name = cms.string("PFCandIdx"),
-      jets = cms.InputTag("slimmedJetsAK8PFPuppiSoftDropPacked","SubJets"),
+      name = cms.string(f"{process.subJetTable.name.value()}PFCand"),
+      idx_name = cms.string(candIdxName),
+      jets = process.subJetTable.src,
       candidates = process.customPFConstituentsTable.src,
       jetCut = cms.string("") # No need to apply cut here.
     )
@@ -161,31 +209,23 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
 
   if doAK4Puppi:
     process.customAK4PuppiConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-      name = cms.string("JetPFCand"),
-      idx_name = cms.string("PFCandIdx"),
-      jets = cms.InputTag("finalJetsPuppi"),
+      name = cms.string(f"{process.jetPuppiTable.name.value()}PFCand"),
+      idx_name = cms.string(candIdxName),
+      jets = process.jetPuppiTable.src,
       candidates = process.customPFConstituentsTable.src,
       jetCut = cms.string("") # No need to apply cut here.
     )
     process.customizedJetCandsTask.add(process.customAK4PuppiConstituentsTable)
-    # Switch name for Run-2.
-    run2_nanoAOD_ANY.toModify(
-      process.customAK4PuppiConstituentsTable, name="JetPuppiPFCand"
-    )
 
   if doAK4CHS:
     process.customAK4CHSConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-      name = cms.string("JetCHSPFCand"),
-      idx_name = cms.string("PFCandIdx"),
-      jets = cms.InputTag("finalJets"),
+      name = cms.string(f"{process.jetTable.name.value()}PFCand"),
+      idx_name = cms.string(candIdxName),
+      jets = process.jetTable.src,
       candidates = process.customPFConstituentsTable.src,
       jetCut = cms.string("") # No need to apply cut here.
     )
     process.customizedJetCandsTask.add(process.customAK4CHSConstituentsTable)
-    # Switch name for Run-2.
-    run2_nanoAOD_ANY.toModify(
-      process.customAK4CHSConstituentsTable, name="JetPFCand"
-    )
 
   return process
 
@@ -259,10 +299,53 @@ def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJe
   process.customGenConstituentsTable.variables.phi.precision = -1
   process.customGenConstituentsTable.variables.mass.precision = -1
 
+  ############################################################
+  #
+  # Experimental Feature START
+  #
+  ############################################################
+  # jetsList = []
+  # jetIdxNamesList = []
+  # jetIdxDocsList = []
+  # jetCutList = []
+  # if doAK8:
+  #   jetsList += [process.genJetAK8Table.src.value()]
+  #   jetIdxNamesList += [process.genJetAK8Table.name.value()]
+  #   jetIdxDocsList += [f"Index of the parent gen jet in {process.genJetAK8Table.name.value()}"]
+  #   jetCutList += [process.genJetAK8Table.cut.value()]
+  # if doAK8Subjets:
+  #   jetsList += [process.genSubJetAK8Table.src.value()]
+  #   jetIdxNamesList += [process.genSubJetAK8Table.name.value()]
+  #   jetIdxDocsList += [f"Index of the parent jet in {process.genSubJetAK8Table.name.value()}"]
+  #   jetCutList += [process.genSubJetAK8Table.cut.value()]
+  # if doAK4:
+  #   jetsList += [process.genJetTable.src.value()]
+  #   jetIdxNamesList += [process.genJetTable.name.value()]
+  #   jetIdxDocsList += [f"Index of the parent jet in {process.genJetTable.name.value()}"]
+  #   jetCutList += [process.genJetTable.cut.value()]
+
+  # process.customGenConstituentsJetIdxExtTable = cms.EDProducer("CandidateGenJetIdxExtTableProducer",
+  #   name = process.customGenConstituentsTable.name,
+  #   candidates = process.customGenConstituentsTable.src,
+  #   jetsV = cms.VInputTag(jetsList),
+  #   jetIdxNamesV = cms.vstring(jetIdxNamesList),
+  #   jetIdxDocsV = cms.vstring(jetIdxDocsList),
+  #   jetCutV = cms.vstring(jetCutList),
+  # )
+  # process.customizedJetCandsTask.add(process.customGenConstituentsJetIdxExtTable)
+  ############################################################
+  #
+  # Experimental Feature END
+  #
+  ############################################################
+  candIdxName="GenPartCandIdx"
+  #
+  #
+  #
   if doAK8:
     process.customAK8GenConstituentsTable = cms.EDProducer("SimpleGenJetConstituentTableProducer",
-      name = cms.string("GenJetAK8GenPartCand"),
-      idx_name = cms.string("GenPartCandIdx"),
+      name = cms.string(f"{process.genJetAK8Table.name.value()}GenPartCand"),
+      idx_name = cms.string(candIdxName),
       jets = process.genJetAK8Table.src,
       candidates = process.customGenConstituentsTable.src,
       jetCut = process.genJetAK8Table.cut
@@ -271,8 +354,8 @@ def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJe
 
   if doAK8Subjets:
     process.customAK8SubJetGenConstituentsTable = cms.EDProducer("SimpleGenJetConstituentTableProducer",
-      name = cms.string("SubGenJetAK8GenPartCand"),
-      idx_name = cms.string("GenPartCandIdx"),
+      name = cms.string(f"{process.genSubJetAK8Table.name.value()}GenPartCand"),
+      idx_name = cms.string(candIdxName),
       jets = process.genSubJetAK8Table.src,
       candidates = process.customGenConstituentsTable.src,
       jetCut = process.genSubJetAK8Table.cut
@@ -281,15 +364,16 @@ def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJe
 
   if doAK4:
     process.customAK4GenConstituentsTable = cms.EDProducer("SimpleGenJetConstituentTableProducer",
-      name = cms.string("GenJetGenPartCand"),
-      idx_name = cms.string("GenPartCandIdx"),
+      name = cms.string(f"{process.genJetTable.name.value()}GenPartCand"),
+      idx_name = cms.string(candIdxName),
       jets = process.genJetTable.src,
       candidates = process.customGenConstituentsTable.src,
       jetCut = process.genJetTable.cut
     )
     process.customizedJetCandsTask.add(process.customAK4GenConstituentsTable)
 
-def PrepJMEPFCustomNanoAOD(process, runOnMC, saveOnlyPFCandsInJets=True, saveGenJetCands=False, saveOnlyGenCandsInJets=True, saveAK8Subjets=False):
+def PrepJMEPFCustomNanoAOD(process, runOnMC,
+  saveOnlyPFCandsInJets=True, saveGenJetCands=False, saveOnlyGenCandsInJets=True, saveAK8Subjets=False):
   process.customizedJetCandsTask = cms.Task()
   process.schedule.associate(process.customizedJetCandsTask)
 
