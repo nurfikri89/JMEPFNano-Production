@@ -28,7 +28,8 @@ private:
   void produce(edm::Event &, const edm::EventSetup &) override;
 
   const std::string name_;
-  const std::string idx_name_;
+  const std::string candIdxName_;
+  const std::string candIdxDoc_;
 
   edm::EDGetTokenT<edm::View<T>> jet_token_;
   edm::EDGetTokenT<reco::CandidateView> cand_token_;
@@ -44,7 +45,8 @@ private:
 template< typename T>
 SimpleJetConstituentTableProducer<T>::SimpleJetConstituentTableProducer(const edm::ParameterSet &iConfig): 
   name_(iConfig.getParameter<std::string>("name")),
-  idx_name_(iConfig.getParameter<std::string>("idx_name")),
+  candIdxName_(iConfig.getParameter<std::string>("candIdxName")),
+  candIdxDoc_(iConfig.getParameter<std::string>("candIdxDoc")),
   jet_token_(consumes<edm::View<T>>(iConfig.getParameter<edm::InputTag>("jets"))),
   cand_token_(consumes<reco::CandidateView>(iConfig.getParameter<edm::InputTag>("candidates"))),
   jetCut_(iConfig.getParameter<std::string>("jetCut"))
@@ -60,7 +62,6 @@ template< typename T>
 void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetup &iSetup) {
   // elements in all these collections must have the same order!
   auto outCands = std::make_unique<std::vector<reco::CandidatePtr>>();
-  std::vector<int> jetIdx_pf, pfcandIdx;
 
   auto jets = iEvent.getHandle(jet_token_);
 
@@ -68,20 +69,22 @@ void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm
   auto candPtrs = cands_->ptrs();
 
   //
-  // Select jets first
+  // First, select jets
   //
   std::vector<T> jetsPassCut;
-  for (unsigned i_jet = 0; i_jet < jets->size(); ++i_jet) {
-    const auto &jet = jets->at(i_jet);
+  for (unsigned jetIdx = 0; jetIdx < jets->size(); ++jetIdx) {
+    const auto &jet = jets->at(jetIdx);
     if (!jetCut_(jet)) continue;
-    jetsPassCut.push_back(jets->at(i_jet));
+    jetsPassCut.push_back(jets->at(jetIdx));
   }
 
   //
   // Then loop over selected jets
   //
-  for (unsigned i_jet = 0; i_jet < jetsPassCut.size(); ++i_jet) {
-    const auto &jet = jetsPassCut.at(i_jet);
+  std::vector<int> candJetIdx;
+  std::vector<int> candIdx;
+  for (unsigned jetIdx = 0; jetIdx < jetsPassCut.size(); ++jetIdx) {
+    const auto &jet = jetsPassCut.at(jetIdx);
 
     //
     // Loop over jet constituents
@@ -94,23 +97,22 @@ void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm
         continue;
       }
       outCands->push_back(cand);
-      jetIdx_pf.push_back(i_jet);
-      pfcandIdx.push_back(candInNewList - candPtrs.begin());
+      candJetIdx.push_back(jetIdx);
+      candIdx.push_back(candInNewList - candPtrs.begin());
     }
-
   }// end jet loop
 
   auto candTable = std::make_unique<nanoaod::FlatTable>(outCands->size(), name_, false);
   // We fill from here only stuff that cannot be created with the SimpleFlatTableProducer
-  candTable->addColumn<int>(idx_name_, pfcandIdx, "Index in the candidate list");
+  candTable->addColumn<int>(candIdxName_, candIdx, candIdxDoc_);
 
-  std::string jetIdxName("jetIdx");
-  std::string jetIdxDoc("Index of the parent jet");
+  std::string candJetIdxName("jetIdx");
+  std::string candJetIdxDoc("Index of the parent jet");
   if constexpr (std::is_same<T,reco::GenJet>::value){
-    jetIdxName = "genJetIdx";
-    jetIdxDoc = "Index of the parent gen jet";
+    candJetIdxName = "genJetIdx";
+    candJetIdxDoc = "Index of the parent gen jet";
   }
-  candTable->addColumn<int>(jetIdxName, jetIdx_pf, jetIdxDoc);
+  candTable->addColumn<int>(candJetIdxName, candJetIdx, candJetIdxDoc);
 
   iEvent.put(std::move(candTable), name_);
   iEvent.put(std::move(outCands));
@@ -119,8 +121,9 @@ void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm
 template< typename T>
 void SimpleJetConstituentTableProducer<T>::fillDescriptions(edm::ConfigurationDescriptions &descriptions) {
   edm::ParameterSetDescription desc;
-  desc.add<std::string>("name", "JetPFCands");
-  desc.add<std::string>("idx_name", "candIdx");
+  desc.add<std::string>("name", "JetPFCand");
+  desc.add<std::string>("candIdxName", "PFCandIdx");
+  desc.add<std::string>("candIdxDoc", "Index in PFCand table");
   desc.add<edm::InputTag>("jets", edm::InputTag("slimmedJets"));
   desc.add<edm::InputTag>("candidates", edm::InputTag("packedPFCandidates"));
   desc.add<std::string>("jetCut", "");

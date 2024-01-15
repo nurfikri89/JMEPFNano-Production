@@ -2,6 +2,7 @@
 <use name="FWCore/MessageLogger"/>
 <library file="*.cc" name="JMEPFNanoProductionPlugins">
   <use name="DataFormats/Common"/>
+  <use name="DataFormats/HepMCCandidate"/>
   <use name="DataFormats/Candidate"/>
   <use name="DataFormats/PatCandidates"/>
   <use name="DataFormats/ParticleFlowCandidate"/>
@@ -18,3 +19,6 @@
   <flags EDM_PLUGIN="1"/>
 </library>
 
+<export>
+  <lib name="1"/>
+</export>
