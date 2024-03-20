@@ -25,12 +25,28 @@ def TrimSecondaryNameForMC(dataset):
   name = dataset.split('/')[2]
   name = name.replace("RunIISummer20UL18MiniAODv2-","MCUL18MiniAODv2")#RENAME CAMPAIGN.
   name = name.replace("106X_upgrade2018_realistic_v16_L1v1","") #REMOVE GT.
-  name = name.replace("Run3Summer22MiniAODv3-","MC22MiniAODv3")#RENAME CAMPAIGN.
-  name = name.replace("124X_mcRun3_2022_realistic_v12","") #REMOVE GT.
-  name = name.replace("Run3Summer22EEMiniAODv3-","MC22EEMiniAODv3")#RENAME CAMPAIGN.
-  name = name.replace("124X_mcRun3_2022_realistic_postEE_v1","") #REMOVE GT.
-  name = name.replace("-v1","")# 
-  name = name.replace("-v2","")# 
+  #
+  name = name.replace("Run3Summer22MiniAODv4-","MC22MiniAODv4")#RENAME CAMPAIGN.
+  name = name.replace("130X_mcRun3_2022_realistic_v5","") #REMOVE GT.
+  #
+  name = name.replace("Run3Summer22EEMiniAODv4-","MC22EEMiniAODv4")#RENAME CAMPAIGN.
+  name = name.replace("130X_mcRun3_2022_realistic_postEE_v6","") #REMOVE GT.
+  #
+  name = name.replace("Run3Summer23MiniAODv4-","MC23MiniAODv4")#RENAME CAMPAIGN.
+  name = name.replace("130X_mcRun3_2023_realistic_v14","") #REMOVE GT.
+  #
+  name = name.replace("Run3Summer23BPixMiniAODv4-","MC23BPixMiniAODv4")#RENAME CAMPAIGN.
+  name = name.replace("130X_mcRun3_2023_realistic_postBPix_v2","") #REMOVE GT.
+  #
+  name = name.replace("NoPU_","_NoPU")#
+  name = name.replace("Poisson60KeepRAW_","_Poisson60KeepRAW")#
+  name = name.replace("EpsilonPU","_Poisson60KeepRAW")#
+  #
+  name = name.replace("_castor_","")#
+  name = name.replace("castor_","")#
+  #
+  name = name.replace("-v1","")#
+  name = name.replace("-v2","")#
   name = name.replace("-v3","")#
   name = name.replace("-v4","")# Remove any version indication.There should only be one valid version for MC samples
   return name
@@ -50,6 +66,7 @@ def TrimSecondaryNameForData(dataset):
 def IsSampleData(dataset):
   name = dataset.split('/')[2]
   isData = False
+  if   "Run2023" in name:isData = True
   if   "Run2022" in name:isData = True
   if   "Run2018" in name:isData = True
   if   "Run2017" in name:isData = True
