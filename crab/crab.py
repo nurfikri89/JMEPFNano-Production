@@ -17,16 +17,23 @@ crab_config = config()
 #
 # Set request name prefx
 #
-reqNamePrefix = "JMEPFNano"
+# reqNamePrefix = "JMEPFNano12p5"
+reqNamePrefix = "PFNano12p5"
 #
 # Set version number (CHECK)
 #
-version = "v2p0_PuppiV17"
+version = "v1p1"
+#
+# Set a non-empty string if we want to remake a sample but save in a new USER dataset
+#
+prodversion=""
+# prodversion="-prodv2"
 #
 # Change this PATH where the crab directories are stored
 # Example: config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects/'
 #
-crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects/'
+crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano/'
+
 #
 crab_config.JobType.pluginName = 'Analysis'
 
@@ -38,8 +45,10 @@ crab_config.JobType.allowUndistributedCMSSW = True
 # Specify the outLFNDirBase and your storage site
 # JetMET CMS EOS space at CERN
 #
-crab_config.Data.outLFNDirBase  = '/store/group/phys_jetmet/'+reqNamePrefix+'_'+version+'/CRABOUTPUT/'
-crab_config.Site.storageSite    = 'T2_CH_CERN'
+# crab_config.Data.outLFNDirBase  = '/store/group/phys_jetmet/'+reqNamePrefix+'_'+version+'/CRABOUTPUT/'
+# crab_config.Site.storageSite    = 'T2_CH_CERN'
+crab_config.Data.outLFNDirBase  = '/store/user/nbinnorj/'+reqNamePrefix+'_'+version+'/CRABOUTPUT/'
+crab_config.Site.storageSite    = 'T2_FI_HIP'
 #
 #
 crab_config.Data.ignoreLocality = True
@@ -65,6 +74,7 @@ whitelist_sites=[
 'T2_CN_*',
 'T2_EE_*',
 'T2_TW_*',
+'T2_FI_*',
 ]
 crab_config.Site.whitelist = whitelist_sites
 
@@ -77,8 +87,11 @@ import sys
 import helpers
 from CRABAPI.RawCommand import crabCommand
 
-runTime_data = 900
-runTime_mc   = 900
+# runTime_data = 360
+# runTime_mc   = 360
+
+runTime_data = 720
+runTime_mc   = 720
 
 fileSplit_data = 1
 fileSplit_mc   = 1
@@ -115,7 +128,8 @@ for i, dataset in enumerate(samplelist):
   #
   isData = helpers.IsSampleData(dataset)
   if isData:
-    crab_config.JobType.psetName  = 'configs/%s/CustomJMEPFNano_Data22_cfg.py'%(version)
+    # crab_config.JobType.psetName  = 'configs/%s_%s/CustomJMEPFNano_Data22_cfg.py'%(version)
+    crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data22_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
     crab_config.JobType.maxJobRuntimeMin = runTime_data
     crab_config.Data.unitsPerJob = fileSplit_data
     # Have to make unique requestName.
@@ -124,29 +138,47 @@ for i, dataset in enumerate(samplelist):
     primaryName   = dataset.split('/')[1]
     secondaryName = helpers.TrimSecondaryNameForData(dataset)
   else:
-    if "Run3Summer22MiniAODv3" in dataset:
-      crab_config.JobType.psetName  = 'configs/%s/CustomJMEPFNano_MC22_cfg.py'%(version)
-    elif "Run3Summer22EEMiniAODv3" in dataset:
-      crab_config.JobType.psetName  = 'configs/%s/CustomJMEPFNano_MC22EE_cfg.py'%(version)
-    crab_config.JobType.maxJobRuntimeMin = runTime_mc 
+    # if "Run3Summer22MiniAODv4" in dataset:
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22_JMEPFNano_PFCandGenPartsInAK4AK8.py'%(reqNamePrefix,version)
+    # elif "Run3Summer22EEMiniAODv4" in dataset:
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC2EE_JMEPFNano_PFCandGenPartsInAK4AK8.py'%(reqNamePrefix,version)
+    # elif "Run3Summer23MiniAODv4" in dataset:
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_JMEPFNano_PFCandGenPartsInAK4AK8.py'%(reqNamePrefix,version)
+    # elif "Run3Summer23EEMiniAODv4" in dataset:
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23BPix_JMEPFNano_PFCandGenPartsInAK4AK8.py'%(reqNamePrefix,version)
+    #
+    if "Run3Summer22MiniAODv4" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    elif "Run3Summer22EEMiniAODv4" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22EE_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    elif "Run3Summer23MiniAODv4" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    elif "Run3Summer23EEMiniAODv4" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23BPix_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+
+    crab_config.JobType.maxJobRuntimeMin = runTime_mc
     crab_config.Data.unitsPerJob = fileSplit_mc
     #
-    # Have to make unique requestName. 
+    # Have to make unique requestName.
     #
     primaryName   = helpers.TrimPrimaryNameForMC(dataset)
     secondaryName = helpers.TrimSecondaryNameForMC(dataset)
 
-  requestName = reqNamePrefix + "_" + version + "_" + primaryName + "_" + secondaryName 
+  requestName = reqNamePrefix + "_" + version + "_" + primaryName + "_" + secondaryName
+  if prodversion != "":
+    requestName += prodversion
   crab_config.General.requestName = requestName
-  
+
   outputDatasetTag = reqNamePrefix + "_" + version + "_" + secondaryName
+  if prodversion != "":
+    outputDatasetTag += prodversion
   crab_config.Data.outputDatasetTag = outputDatasetTag
 
   print("requestName: "+crab_config.General.requestName)
-  print("outputDatasetTag: "+crab_config.Data.outputDatasetTag)  
+  print("outputDatasetTag: "+crab_config.Data.outputDatasetTag)
   print(crab_config.Data.splitting)
   print(crab_config.Data.unitsPerJob)
   print(crab_config.JobType.maxJobRuntimeMin)
-  # print(crab_config.Data.lumiMask)
+  #####print(crab_config.Data.lumiMask)
   crabCommand('submit', config = crab_config)
   print("")
