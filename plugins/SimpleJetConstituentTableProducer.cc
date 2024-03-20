@@ -81,7 +81,7 @@ void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm
   //
   // Then loop over selected jets
   //
-  std::vector<int> candJetIdx;
+  std::vector<int> parentJetIdx;
   std::vector<int> candIdx;
   for (unsigned jetIdx = 0; jetIdx < jetsPassCut.size(); ++jetIdx) {
     const auto &jet = jetsPassCut.at(jetIdx);
@@ -97,7 +97,7 @@ void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm
         continue;
       }
       outCands->push_back(cand);
-      candJetIdx.push_back(jetIdx);
+      parentJetIdx.push_back(jetIdx);
       candIdx.push_back(candInNewList - candPtrs.begin());
     }
   }// end jet loop
@@ -106,13 +106,13 @@ void SimpleJetConstituentTableProducer<T>::produce(edm::Event &iEvent, const edm
   // We fill from here only stuff that cannot be created with the SimpleFlatTableProducer
   candTable->addColumn<int>(candIdxName_, candIdx, candIdxDoc_);
 
-  std::string candJetIdxName("jetIdx");
-  std::string candJetIdxDoc("Index of the parent jet");
+  std::string parentJetIdxName("jetIdx");
+  std::string parentJetIdxDoc("Index of the parent jet");
   if constexpr (std::is_same<T,reco::GenJet>::value){
-    candJetIdxName = "genJetIdx";
-    candJetIdxDoc = "Index of the parent gen jet";
+    parentJetIdxName = "genJetIdx";
+    parentJetIdxDoc = "Index of the parent gen jet";
   }
-  candTable->addColumn<int>(candJetIdxName, candJetIdx, candJetIdxDoc);
+  candTable->addColumn<int>(parentJetIdxName, parentJetIdx, parentJetIdxDoc);
 
   iEvent.put(std::move(candTable), name_);
   iEvent.put(std::move(outCands));

@@ -55,12 +55,12 @@ SimpleSelectedCandidateTableProducer::SimpleSelectedCandidateTableProducer(const
   candMain_token_(consumes<reco::CandidateView>(iConfig.getParameter<edm::InputTag>("candidatesMain"))),
   candSelected_token_(consumes<reco::CandidateView>(iConfig.getParameter<edm::InputTag>("candidatesSelected")))
 {
-  getGenInfo_=false;
-  edm::InputTag pc2gpInputTag = iConfig.getParameter<edm::InputTag>("pc2gp");
-  if (!pc2gpInputTag.label().empty()) {
-    pc2gp_token_ = consumes<edm::Association<reco::GenParticleCollection>>(iConfig.getParameter<edm::InputTag>("pc2gp"));
-    getGenInfo_ = true;
-  }
+  // getGenInfo_=false;
+  // edm::InputTag pc2gpInputTag = iConfig.getParameter<edm::InputTag>("pc2gp");
+  // if (!pc2gpInputTag.label().empty()) {
+  //   pc2gp_token_ = consumes<edm::Association<reco::GenParticleCollection>>(iConfig.getParameter<edm::InputTag>("pc2gp"));
+  //   getGenInfo_ = true;
+  // }
 
   produces<nanoaod::FlatTable>(name_);
   produces<std::vector<reco::CandidatePtr>>();
@@ -79,8 +79,8 @@ void SimpleSelectedCandidateTableProducer::produce(edm::Event &iEvent, const edm
   auto candSelectedPtrs = candSelected_->ptrs();
 
   // if (getGenInfo_){
-  iEvent.getByToken(pc2gp_token_, pc2gp_);
-  const auto& packedCandToGenParticles = *pc2gp_;
+  //   iEvent.getByToken(pc2gp_token_, pc2gp_);
+  //   const auto& packedCandToGenParticles = *pc2gp_;
   // }
 
   //
@@ -88,11 +88,11 @@ void SimpleSelectedCandidateTableProducer::produce(edm::Event &iEvent, const edm
   //
   std::vector<int> candIdx;
 
-  std::vector<float> genPartAssoc_pt;
-  std::vector<float> genPartAssoc_eta;
-  std::vector<float> genPartAssoc_phi;
-  std::vector<float> genPartAssoc_mass;
-  std::vector<int>   genPartAssoc_pdgId;
+  // std::vector<float> genPartAssoc_pt;
+  // std::vector<float> genPartAssoc_eta;
+  // std::vector<float> genPartAssoc_phi;
+  // std::vector<float> genPartAssoc_mass;
+  // std::vector<int>   genPartAssoc_pdgId;
 
   for (unsigned candSelectedIdx = 0; candSelectedIdx < candSelectedPtrs.size(); ++candSelectedIdx) {
     const auto& candSelected = candSelectedPtrs.at(candSelectedIdx);
@@ -103,42 +103,42 @@ void SimpleSelectedCandidateTableProducer::produce(edm::Event &iEvent, const edm
     outCands->push_back(candSelected);
     candIdx.push_back(candInMainList - candMainPtrs.begin());
 
-    float genPart_pt = -1.;
-    float genPart_eta = -9.;
-    float genPart_phi = -9.;
-    float genPart_mass = -9.;
-    float genPart_pdgId = 0;
+    // float genPart_pt = -1.;
+    // float genPart_eta = -9.;
+    // float genPart_phi = -9.;
+    // float genPart_mass = -9.;
+    // float genPart_pdgId = 0;
 
-    if (getGenInfo_){
-      const pat::PackedCandidate* packedCand = dynamic_cast<const pat::PackedCandidate*>(candSelected.get());
-      if (packedCand && packedCand->hasTrackDetails()){
-        auto genPart = packedCandToGenParticles[candSelected];
-        if(genPart.isNonnull()){
-          genPart_pt = genPart->pt();
-          genPart_eta = genPart->eta();
-          genPart_phi = genPart->phi();
-          genPart_mass = genPart->mass();
-          genPart_pdgId = genPart->pdgId();
-        }
-      }
-    }
-    genPartAssoc_pt.push_back(genPart_pt);
-    genPartAssoc_eta.push_back(genPart_eta);
-    genPartAssoc_phi.push_back(genPart_phi);
-    genPartAssoc_mass.push_back(genPart_mass);
-    genPartAssoc_pdgId.push_back(genPart_pdgId);
+    // if (getGenInfo_){
+    //   const pat::PackedCandidate* packedCand = dynamic_cast<const pat::PackedCandidate*>(candSelected.get());
+    //   if (packedCand && packedCand->hasTrackDetails()){
+    //     auto genPart = packedCandToGenParticles[candSelected];
+    //     if(genPart.isNonnull()){
+    //       genPart_pt = genPart->pt();
+    //       genPart_eta = genPart->eta();
+    //       genPart_phi = genPart->phi();
+    //       genPart_mass = genPart->mass();
+    //       genPart_pdgId = genPart->pdgId();
+    //     }
+    //   }
+    // }
+    // genPartAssoc_pt.push_back(genPart_pt);
+    // genPartAssoc_eta.push_back(genPart_eta);
+    // genPartAssoc_phi.push_back(genPart_phi);
+    // genPartAssoc_mass.push_back(genPart_mass);
+    // genPartAssoc_pdgId.push_back(genPart_pdgId);
   }
 
   auto candTable = std::make_unique<nanoaod::FlatTable>(outCands->size(), name_, false, true);
   // We fill from here only stuff that cannot be created with the SimpleFlatTableProducer
   candTable->addColumn<int>(candIdxName_, candIdx, candIdxDoc_);
-  if (getGenInfo_){
-    candTable->addColumn<float>("GenPt",genPartAssoc_pt,"pt of gen particle matched to track",15);
-    candTable->addColumn<float>("GenEta",genPartAssoc_eta, "eta of gen particle matched to track",15);
-    candTable->addColumn<float>("GenPhi",genPartAssoc_phi, "phi of gen particle matched to track",15);
-    candTable->addColumn<float>("GenMass",genPartAssoc_mass, "mass of gen particle matched to track",15);
-    candTable->addColumn<int>("GenPdgId",genPartAssoc_pdgId, "pdgId of gen particle matched to track");
-  }
+  // if (getGenInfo_){
+  //   candTable->addColumn<float>("GenPt",genPartAssoc_pt,"pt of gen particle matched to track",15);
+  //   candTable->addColumn<float>("GenEta",genPartAssoc_eta, "eta of gen particle matched to track",15);
+  //   candTable->addColumn<float>("GenPhi",genPartAssoc_phi, "phi of gen particle matched to track",15);
+  //   candTable->addColumn<float>("GenMass",genPartAssoc_mass, "mass of gen particle matched to track",15);
+  //   candTable->addColumn<int>("GenPdgId",genPartAssoc_pdgId, "pdgId of gen particle matched to track");
+  // }
 
   iEvent.put(std::move(candTable), name_);
   iEvent.put(std::move(outCands));
@@ -151,7 +151,7 @@ void SimpleSelectedCandidateTableProducer::fillDescriptions(edm::ConfigurationDe
   desc.add<std::string>("candIdxDoc",  "Index in PFCand table");
   desc.add<edm::InputTag>("candidatesMain", edm::InputTag("packedPFCandidates"));
   desc.add<edm::InputTag>("candidatesSelected", edm::InputTag("packedPFCandidates"));
-  desc.add<edm::InputTag>("pc2gp", edm::InputTag(""));
+  // desc.add<edm::InputTag>("pc2gp", edm::InputTag(""));
   descriptions.addWithDefaultLabel(desc);
 }
 
