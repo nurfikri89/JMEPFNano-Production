@@ -26,6 +26,7 @@ private:
 
   edm::EDGetTokenT<reco::CandidateView>  pfcands_token_;
   const std::string name_;
+  const bool saveFromPVvertexRef_;
   const int weightPrecision_;
 
   std::vector<edm::EDGetTokenT<edm::ValueMap<float>>> v_pfcands_weights_tokens_;
@@ -39,6 +40,7 @@ private:
 PFCandidateExtTableProducerV2::PFCandidateExtTableProducerV2(const edm::ParameterSet &iConfig):
   pfcands_token_(consumes<reco::CandidateView>(iConfig.getParameter<edm::InputTag>("srcPFCandidates"))),
   name_(iConfig.getParameter<std::string>("name")),
+  saveFromPVvertexRef_(iConfig.getParameter<bool>("saveFromPVvertexRef")),
   weightPrecision_(iConfig.getParameter<int>("weightPrecision"))
 {
   v_pfcands_weights_tokens_ = edm::vector_transform(
@@ -89,16 +91,33 @@ void PFCandidateExtTableProducerV2::produce(edm::Event &iEvent, const edm::Event
     v_v_weightsOut.push_back(weightsOut);
   }
 
+  std::vector<int> fromPV_vertexRefOutVec;
+  fromPV_vertexRefOutVec.reserve(pfCands->size());
+
   //
   // Loop over ptr-candidate collection
   //
   for (size_t iPtr = 0; iPtr < candPtrs.size(); ++iPtr) {
     auto candPtr = candPtrs[iPtr];
+
+
     //
     // For each ptr-candidate collection, save all
     //
     for (size_t iW = 0; iW < v_pfcands_weights.size(); ++iW) {
       v_v_weightsOut[iW].push_back(v_pfcands_weights[iW][candPtr]);
+    }
+    //
+    //
+    //
+    const reco::Candidate* cand = candPtr.get();
+    const pat::PackedCandidate* packedCand = dynamic_cast<const pat::PackedCandidate*>(cand);
+
+    if(saveFromPVvertexRef_){
+      int fromPV_vertexRef = -1;
+      if (packedCand->vertexRef().isNonnull())
+        fromPV_vertexRef = packedCand->fromPV(packedCand->vertexRef().key());
+      fromPV_vertexRefOutVec.push_back(fromPV_vertexRef);
     }
   }
 
@@ -109,6 +128,9 @@ void PFCandidateExtTableProducerV2::produce(edm::Event &iEvent, const edm::Event
   for (size_t iW = 0; iW < v_pfcands_weights.size(); ++iW) {
     candTable->addColumn<float>(v_weightNames_[iW], v_v_weightsOut[iW], v_weightDocs_[iW], weightPrecision_);
   }
+  if (saveFromPVvertexRef_){
+    candTable->addColumn<int>("fromPVvertexRef", fromPV_vertexRefOutVec, "PV(vertexRef) (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)");
+  }
   iEvent.put(std::move(candTable), name_);
 }
 
@@ -116,6 +138,7 @@ void PFCandidateExtTableProducerV2::fillDescriptions(edm::ConfigurationDescripti
   edm::ParameterSetDescription desc;
   desc.add<edm::InputTag>("srcPFCandidates", edm::InputTag("finalJetsConstituents"));
   desc.add<std::string>("name", "PFCands");
+  desc.add<bool>("saveFromPVvertexRef", false);
   desc.add<int>("weightPrecision", -1);
 
   std::vector<edm::InputTag> emptyVInputTags;
