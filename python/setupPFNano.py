@@ -21,7 +21,7 @@ def addProcessAndTask(proc, label, module):
 #
 ######################################################################
 def PrepJetConstituents(process, saveOnlyPFCandsInJets,
-  doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True, doAK8PuppiSubjets=False):
+  doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True, doAK8PuppiSubjets=False, doTau=False):
 
   if saveOnlyPFCandsInJets:
     #################################################################
@@ -65,6 +65,15 @@ def PrepJetConstituents(process, saveOnlyPFCandsInJets,
       process.customizedJetCandsTask.add(process.finalJetsAK8SubjetConstituents)
       candList += cms.VInputTag(cms.InputTag("finalJetsAK8SubjetConstituents", "constituents"))
 
+    if doTau:
+      # Collect Tau signalCands and isolationCands
+      process.finalTausConstituents = cms.EDProducer("PatTauConstituentSelector",
+        src = cms.InputTag("finalTaus"),
+        cut = cms.string("") # Store all PF candidates for all taus
+      )
+      process.customizedJetCandsTask.add(process.finalTausConstituents)
+      candList += cms.VInputTag(cms.InputTag("finalTausConstituents", "constituents"))
+
     #
     # Merge all candidate pointers
     #
@@ -89,7 +98,7 @@ def PrepJetConstituents(process, saveOnlyPFCandsInJets,
 
   return process, candInputForTable
 
-def SaveIsoChargedHadronPFCandidates(process):
+def SaveIsoChargedHadronPFCandidates(process, runOnMC=False):
   process.pfIsoChargedHadron = cms.EDProducer("PackedCandidatePtrSelector",
     src = cms.InputTag("packedPFCandidates"),
     cut = cms.string("isIsolatedChargedHadron()"),
@@ -101,34 +110,34 @@ def SaveIsoChargedHadronPFCandidates(process):
     src = cms.InputTag("pfIsoChargedHadron"),
     cut = cms.string(""), #we should not filter
     name = cms.string("IsoChHadPFCand"),
-    doc = cms.string("Isolated Charged Hadron PF candidates passing CHS and track p > 3 GeV"),
+    doc = cms.string("Isolated Charged Hadron PF candidates"),
     singleton = cms.bool(False), # the number of entries is variable
     extension = cms.bool(False), # this is the extension table for the AK8 constituents
     variables = cms.PSet(
       rawCaloFraction = Var("rawCaloFraction()", float, doc="(rawEcalE+rawHcalE)/candE. Only for isolated charged hadron", precision=15),
       rawHcalFraction = Var("rawHcalFraction()", float, doc="rawHcalE/(rawEcalE+rawHcalE). Only for isolated charged hadrons", precision=15),
-      caloFraction = Var("caloFraction()", float, doc="(EcalE+HcalE)/candE", precision=15),
-      hcalFraction = Var("hcalFraction()", float, doc="HcalE/(EcalE+HcalE)", precision=15),
-      trkQuality = Var("?hasTrackDetails()?bestTrack().qualityMask():0", int, doc="track quality mask"),
-      trkHighPurity = Var("trackHighPurity()", bool, doc="is trackHighPurity"),
-      trkAlgo = Var("?hasTrackDetails()?bestTrack().algo():-1", int, doc="track algorithm"),
-      trkP = Var("?hasTrackDetails()?bestTrack().p():-1", float, doc="track momemtum", precision=15),
-      trkPt = Var("?hasTrackDetails()?bestTrack().pt():-1", float, doc="track pt", precision=15),
-      trkEta = Var("?hasTrackDetails()?bestTrack().eta():-1", float, doc="track eta", precision=15),
-      trkPhi = Var("?hasTrackDetails()?bestTrack().phi():-1", float, doc="track phi", precision=15),
-      dz = Var("?hasTrackDetails()?dz():-1", float, doc="dz", precision=15),
-      dzErr = Var("?hasTrackDetails()?dzError():-1", float, doc="dz err", precision=15),
-      d0 = Var("?hasTrackDetails()?dxy():-1", float, doc="dxy", precision=15),
-      d0Err = Var("?hasTrackDetails()?dxyError():-1", float, doc="dxy err", precision=15),
-      nHits = Var("numberOfHits()", int, doc="numberOfHits()"),
-      nPixelHits = Var("numberOfPixelHits()", int, doc="numberOfPixelHits()"),
-      lostInnerHits = Var("lostInnerHits()", int, doc="lost inner hits. -1: validHitInFirstPixelBarrelLayer, 0: noLostInnerHits, 1: oneLostInnerHit, 2: moreLostInnerHits"),
-      lostOuterHits = Var("?hasTrackDetails()?bestTrack().hitPattern().numberOfLostHits('MISSING_OUTER_HITS'):0", int, doc="lost outer hits"),
-      trkChi2 = Var("?hasTrackDetails()?bestTrack().normalizedChi2():-1", float, doc="normalized trk chi2", precision=15),
-      pvAssocQuality = Var("pvAssociationQuality()", int, doc="primary vertex association quality (NotReconstructedPrimary = 0, OtherDeltaZ = 1, CompatibilityBTag = 4, CompatibilityDz = 5, UsedInFitLoose = 6, UsedInFitTight = 7)"),
-      vertexRef = Var("?vertexRef().isNonnull()?vertexRef().key():-1", int, doc="vertexRef().key()"),
-      fromPV0 = Var("fromPV()", int, doc="PV0 association (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)"),
-      vtxChi2 = Var("?hasTrackDetails()?vertexChi2():-1", float, doc="vertex chi2",precision=15),
+      # caloFraction = Var("caloFraction()", float, doc="(EcalE+HcalE)/candE", precision=15),
+      # hcalFraction = Var("hcalFraction()", float, doc="HcalE/(EcalE+HcalE)", precision=15),
+      # trkQuality = Var("?hasTrackDetails()?bestTrack().qualityMask():0", int, doc="track quality mask"),
+      # trkHighPurity = Var("trackHighPurity()", bool, doc="is trackHighPurity"),
+      # trkAlgo = Var("?hasTrackDetails()?bestTrack().algo():-1", int, doc="track algorithm"),
+      # trkP = Var("?hasTrackDetails()?bestTrack().p():-1", float, doc="track momemtum", precision=15),
+      # trkPt = Var("?hasTrackDetails()?bestTrack().pt():-1", float, doc="track pt", precision=15),
+      # trkEta = Var("?hasTrackDetails()?bestTrack().eta():-1", float, doc="track eta", precision=15),
+      # trkPhi = Var("?hasTrackDetails()?bestTrack().phi():-1", float, doc="track phi", precision=15),
+      # dz = Var("?hasTrackDetails()?dz():-1", float, doc="dz", precision=15),
+      # dzErr = Var("?hasTrackDetails()?dzError():-1", float, doc="dz err", precision=15),
+      # d0 = Var("?hasTrackDetails()?dxy():-1", float, doc="dxy", precision=15),
+      # d0Err = Var("?hasTrackDetails()?dxyError():-1", float, doc="dxy err", precision=15),
+      # nHits = Var("numberOfHits()", int, doc="numberOfHits()"),
+      # nPixelHits = Var("numberOfPixelHits()", int, doc="numberOfPixelHits()"),
+      # lostInnerHits = Var("lostInnerHits()", int, doc="lost inner hits. -1: validHitInFirstPixelBarrelLayer, 0: noLostInnerHits, 1: oneLostInnerHit, 2: moreLostInnerHits"),
+      # lostOuterHits = Var("?hasTrackDetails()?bestTrack().hitPattern().numberOfLostHits('MISSING_OUTER_HITS'):0", int, doc="lost outer hits"),
+      # trkChi2 = Var("?hasTrackDetails()?bestTrack().normalizedChi2():-1", float, doc="normalized trk chi2", precision=15),
+      # pvAssocQuality = Var("pvAssociationQuality()", int, doc="primary vertex association quality (NotReconstructedPrimary = 0, OtherDeltaZ = 1, CompatibilityBTag = 4, CompatibilityDz = 5, UsedInFitLoose = 6, UsedInFitTight = 7)"),
+      # vertexRef = Var("?vertexRef().isNonnull()?vertexRef().key():-1", int, doc="vertexRef().key()"),
+      # fromPV0 = Var("fromPV()", int, doc="PV0 association (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)"),
+      # vtxChi2 = Var("?hasTrackDetails()?vertexChi2():-1", float, doc="vertex chi2",precision=15),
     )
   )
   process.customizedJetCandsTask.add(process.customPFIsoChargedHadronCandidateTable)
@@ -139,14 +148,47 @@ def SaveIsoChargedHadronPFCandidates(process):
     candIdxDoc = cms.string("Index in PFCand table"),
     candidatesMain = process.customPFConstituentsTable.src,
     candidatesSelected = process.customPFIsoChargedHadronCandidateTable.src,
-    pc2gp = cms.InputTag("packedPFCandidateToGenAssociation")
+    # pc2gp = cms.InputTag("packedPFCandidateToGenAssociation" if runOnMC else "")
   )
   process.customizedJetCandsTask.add(process.customPFIsoChargedHadronCandidateExtTable)
 
   return process
 
+def SaveIsoChargedHadronPFCandidates_MC(process):
+  process = SaveIsoChargedHadronPFCandidates(process,runOnMC=True)
+  return process
+
+def SaveIsoChargedHadronPFCandidates_Data(process):
+  process = SaveIsoChargedHadronPFCandidates(process,runOnMC=False)
+  return process
+
+
+def SavePFInfoForElecPhoton(process):
+  process.electronTable.variables.pf0pt    =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].pt():-1.",   float, doc="pf0 pt",precision=15)
+  process.electronTable.variables.pf0eta   =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].eta():-9.",  float, doc="pf0 pt",precision=15)
+  process.electronTable.variables.pf0phi   =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].phi():-9.",  float, doc="pf0 pt",precision=15)
+  process.electronTable.variables.pf0mass  =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].mass():-1.", float, doc="pf0 pt",precision=15)
+  process.electronTable.variables.pf0pdgId =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].pdgId():-1.",  int, doc="pf0 pdgid")
+  process.electronTable.variables.pf1pt    =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].pt():-1.",   float, doc="pf1 pt",precision=15)
+  process.electronTable.variables.pf1eta   =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].eta():-9.",  float, doc="pf1 pt",precision=15)
+  process.electronTable.variables.pf1phi   =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].phi():-9.",  float, doc="pf1 pt",precision=15)
+  process.electronTable.variables.pf1mass  =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].mass():-1.", float, doc="pf1 pt",precision=15)
+  process.electronTable.variables.pf1pdgId =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].pdgId():0.",   int, doc="pf1 pdgid")
+
+  process.photonTable.variables.pf0pt     =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].pt():-1.",   float, doc="pf0 pt",precision=15)
+  process.photonTable.variables.pf0eta    =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].eta():-9.",  float, doc="pf0 pt",precision=15)
+  process.photonTable.variables.pf0phi    =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].phi():-9.",  float, doc="pf0 pt",precision=15)
+  process.photonTable.variables.pf0mass   =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].mass():-1.", float, doc="pf0 pt",precision=15)
+  process.photonTable.variables.pf0pdgId  =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].pdgId():-1.",  int, doc="pf0 pdgid")
+  process.photonTable.variables.pf1pt     =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].pt():-1.",   float, doc="pf1 pt",precision=15)
+  process.photonTable.variables.pf1eta    =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].eta():-9.",  float, doc="pf1 pt",precision=15)
+  process.photonTable.variables.pf1phi    =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].phi():-9.",  float, doc="pf1 pt",precision=15)
+  process.photonTable.variables.pf1mass   =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].mass():-1.", float, doc="pf1 pt",precision=15)
+  process.photonTable.variables.pf1pdgId  =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].pdgId():0",    int, doc="pf1 pdgid")
+  return process
+
 def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
-  doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True, doAK8PuppiSubjets=False):
+  doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True, doAK8PuppiSubjets=False, doTau=False):
 
   ############################################################
   #
@@ -161,6 +203,9 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
     if doAK4CHS:   docStrList += ["AK4CHS"]
     if doAK8PuppiSubjets:   docStrList += ["AK8PuppiSubjets"]
     docStr += " from following jets: "+", ".join(docStrList)
+    docStr += "."
+    if doTau:
+      docStr += "Also from taus."
 
   process.customPFConstituentsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     src = candInputForTable,
@@ -175,31 +220,31 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
       passCHS = Var(pfCHS.cut.value(), bool, doc=pfCHS.cut.value()),
       isIsolatedChargedHadron = Var("isIsolatedChargedHadron()", bool, doc="isIsolatedChargedHadron()"),
       #
-      # rawCaloFraction = Var("rawCaloFraction()", bool, doc="(rawEcalE+rawHcalE)/candE. Only for isolated charged hadron"),
-      # rawHcalFraction = Var("rawHcalFraction()", bool, doc="rawHcalE/(rawEcalE+rawHcalE). Only for isolated charged hadrons"),
-      # caloFraction = Var("caloFraction()", bool, doc="(EcalE+HcalE)/candE"),
-      # hcalFraction = Var("hcalFraction()", bool, doc="HcalE/(EcalE+HcalE)"),
+      trkQuality = Var("?hasTrackDetails()?bestTrack().qualityMask():0", int, doc="track quality mask"),
+      trkHighPurity = Var("trackHighPurity()", bool, doc="is trackHighPurity"),
+      trkAlgo = Var("?hasTrackDetails()?bestTrack().algo():-1", int, doc="track algorithm"),
+      trkP = Var("?hasTrackDetails()?bestTrack().p():-1", float, doc="track momemtum", precision=-1),
+      trkPt = Var("?hasTrackDetails()?bestTrack().pt():-1", float, doc="track pt", precision=-1),
+      trkEta = Var("?hasTrackDetails()?bestTrack().eta():-1", float, doc="track eta", precision=-1),
+      trkPhi = Var("?hasTrackDetails()?bestTrack().phi():-1", float, doc="track phi", precision=-1),
+      dz = Var("?hasTrackDetails()?dz():-1", float, doc="dz", precision=15),
+      dzErr = Var("?hasTrackDetails()?dzError():-1", float, doc="dz err", precision=15),
+      d0 = Var("?hasTrackDetails()?dxy():-1", float, doc="dxy", precision=15),
+      d0Err = Var("?hasTrackDetails()?dxyError():-1", float, doc="dxy err", precision=15),
+      nHits = Var("numberOfHits()", int, doc="numberOfHits()"),
+      nPixelHits = Var("numberOfPixelHits()", int, doc="numberOfPixelHits()"),
+      lostInnerHits = Var("lostInnerHits()", int, doc="lost inner hits. -1: validHitInFirstPixelBarrelLayer, 0: noLostInnerHits, 1: oneLostInnerHit, 2: moreLostInnerHits"),
+      lostOuterHits = Var("?hasTrackDetails()?bestTrack().hitPattern().numberOfLostHits('MISSING_OUTER_HITS'):0", int, doc="lost outer hits"),
+      trkChi2 = Var("?hasTrackDetails()?bestTrack().normalizedChi2():-1", float, doc="normalized trk chi2", precision=15),
+      pvAssocQuality = Var("pvAssociationQuality()", int, doc="primary vertex association quality (NotReconstructedPrimary = 0, OtherDeltaZ = 1, CompatibilityBTag = 4, CompatibilityDz = 5, UsedInFitLoose = 6, UsedInFitTight = 7)"),
+      vertexRef = Var("?vertexRef().isNonnull()?vertexRef().key():-1", int, doc="vertexRef().key()"),
+      fromPV0 = Var("fromPV()", int, doc="PV0 association (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)"),
+      vtxChi2 = Var("?hasTrackDetails()?vertexChi2():-1", float, doc="vertex chi2",precision=15),
+      caloFraction = Var("caloFraction()", bool, doc="(EcalE+HcalE)/candE"),
+      hcalFraction = Var("hcalFraction()", bool, doc="HcalE/(EcalE+HcalE)"),
       #
-      # trkQuality = Var("?hasTrackDetails()?bestTrack().qualityMask():0", int, doc="track quality mask"),
-      # trkHighPurity = Var("trackHighPurity()", bool, doc="is trackHighPurity"),
-      # trkAlgo = Var("?hasTrackDetails()?bestTrack().algo():-1", int, doc="track algorithm"),
-      # trkP = Var("?hasTrackDetails()?bestTrack().p():-1", float, doc="track momemtum", precision=-1),
-      # trkPt = Var("?hasTrackDetails()?bestTrack().pt():-1", float, doc="track pt", precision=-1),
-      # trkEta = Var("?hasTrackDetails()?bestTrack().eta():-1", float, doc="track eta", precision=-1),
-      # trkPhi = Var("?hasTrackDetails()?bestTrack().phi():-1", float, doc="track phi", precision=-1),
-      # dz = Var("?hasTrackDetails()?dz():-1", float, doc="dz", precision=15),
-      # dzErr = Var("?hasTrackDetails()?dzError():-1", float, doc="dz err", precision=15),
-      # d0 = Var("?hasTrackDetails()?dxy():-1", float, doc="dxy", precision=15),
-      # d0Err = Var("?hasTrackDetails()?dxyError():-1", float, doc="dxy err", precision=15),
-      # nHits = Var("numberOfHits()", int, doc="numberOfHits()"),
-      # nPixelHits = Var("numberOfPixelHits()", int, doc="numberOfPixelHits()"),
-      # lostInnerHits = Var("lostInnerHits()", int, doc="lost inner hits. -1: validHitInFirstPixelBarrelLayer, 0: noLostInnerHits, 1: oneLostInnerHit, 2: moreLostInnerHits"),
-      # lostOuterHits = Var("?hasTrackDetails()?bestTrack().hitPattern().numberOfLostHits('MISSING_OUTER_HITS'):0", int, doc="lost outer hits"),
-      # trkChi2 = Var("?hasTrackDetails()?bestTrack().normalizedChi2():-1", float, doc="normalized trk chi2", precision=15),
-      # pvAssocQuality = Var("pvAssociationQuality()", int, doc="primary vertex association quality (NotReconstructedPrimary = 0, OtherDeltaZ = 1, CompatibilityBTag = 4, CompatibilityDz = 5, UsedInFitLoose = 6, UsedInFitTight = 7)"),
-      # vertexRef = Var("?vertexRef().isNonnull()?vertexRef().key():-1", int, doc="vertexRef().key()"),
-      # fromPV0 = Var("fromPV()", int, doc="PV0 association (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)"),
-      # vtxChi2 = Var("?hasTrackDetails()?vertexChi2():-1", float, doc="vertex chi2",precision=15),
+      rawCaloFraction = Var("rawCaloFraction()", bool, doc="(rawEcalE+rawHcalE)/candE. Only for isolated charged hadron"),
+      rawHcalFraction = Var("rawHcalFraction()", bool, doc="rawHcalE/(rawEcalE+rawHcalE). Only for isolated charged hadrons"),
     )
   )
   process.customizedJetCandsTask.add(process.customPFConstituentsTable)
@@ -229,21 +274,26 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
   #
   # NOTE: Use this one if you want to store multiple constituent weights
   #
-  # process.customPFConstituentsExtTable = cms.EDProducer("PFCandidateExtTableProducerV2",
-  #   srcPFCandidates = process.customPFConstituentsTable.src,
-  #   name = process.customPFConstituentsTable.name,
-  #   srcWeightsV = cms.VInputTag(
-  #     cms.InputTag("packedpuppi")
-  #   ),
-  #   weightNamesV = cms.vstring(
-  #     "puppiWeightValueMap",
-  #   ),
-  #   weightDocsV = cms.vstring(
-  #     "Puppi Weight (ValueMap from PuppiProducer)",
-  #   ),
-  #   weightPrecision = process.customPFConstituentsTable.variables.puppiWeight.precision,
-  # )
-  # process.customizedJetCandsTask.add(process.customPFConstituentsExtTable)
+  # packedpuppi, packedpuppiNoLep = setupPuppiForPackedPF(process, useExistingWeights=True)
+  process.customPFConstituentsExtTable = cms.EDProducer("PFCandidateExtTableProducerV2",
+    srcPFCandidates = process.customPFConstituentsTable.src,
+    name = process.customPFConstituentsTable.name,
+    srcWeightsV = cms.VInputTag(
+      cms.InputTag("packedpuppi"),
+      cms.InputTag("packedpuppiNoLep")
+    ),
+    weightNamesV = cms.vstring(
+      "puppiWeightValueMap",
+      "puppiWeightNoLepValueMap",
+    ),
+    weightDocsV = cms.vstring(
+      "Puppi Weight (ValueMap from PuppiProducer)",
+      "Puppi Weight No Lep (ValueMap from PuppiProducer)",
+    ),
+    weightPrecision = process.customPFConstituentsTable.variables.puppiWeight.precision,
+    saveFromPVvertexRef = cms.bool(True)
+  )
+  process.customizedJetCandsTask.add(process.customPFConstituentsExtTable)
 
   ############################################################
   #
@@ -301,13 +351,9 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
   # Make a separate table for each jet collection, which consists of the index of the candidate
   # and the index of the jet
   #
-  makeConstJetTable=False
-  candIdxName="PFCandIdx"
-  candIdxDoc="Index in the PFCand table"
-  #
-  #
-  #
   if makeConstJetTable:
+    candIdxName="PFCandIdx"
+    candIdxDoc="Index in the PFCand table"
     if doAK8Puppi:
       process.customAK8ConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
         name = cms.string(f"{process.fatJetTable.name.value()}PFCand"),
@@ -318,17 +364,6 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
         jetCut = cms.string("") # No need to apply cut here.
       )
       process.customizedJetCandsTask.add(process.customAK8ConstituentsTable)
-
-    if doAK8PuppiSubjets:
-      process.customAK8SubjetConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
-        name = cms.string(f"{process.subJetTable.name.value()}PFCand"),
-        candIdxName = cms.string(candIdxName),
-        candIdxDoc = cms.string(candIdxDoc),
-        jets = process.subJetTable.src,
-        candidates = process.customPFConstituentsTable.src,
-        jetCut = cms.string("") # No need to apply cut here.
-      )
-      process.customizedJetCandsTask.add(process.customAK8SubjetConstituentsTable)
 
     if doAK4Puppi:
       process.customAK4PuppiConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
@@ -351,6 +386,28 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
         jetCut = cms.string("") # No need to apply cut here.
       )
       process.customizedJetCandsTask.add(process.customAK4CHSConstituentsTable)
+
+    if doAK8PuppiSubjets:
+      process.customAK8SubjetConstituentsTable = cms.EDProducer("SimplePatJetConstituentTableProducer",
+        name = cms.string(f"{process.subJetTable.name.value()}PFCand"),
+        candIdxName = cms.string(candIdxName),
+        candIdxDoc = cms.string(candIdxDoc),
+        jets = process.subJetTable.src,
+        candidates = process.customPFConstituentsTable.src,
+        jetCut = cms.string("") # No need to apply cut here.
+      )
+      process.customizedJetCandsTask.add(process.customAK8SubjetConstituentsTable)
+
+    if doTau:
+      process.customTauConstituentsTable = cms.EDProducer("SimplePatTauConstituentTableProducer",
+        name = cms.string(f"{process.tauTable.name.value()}PFCand"),
+        candIdxName = cms.string(candIdxName),
+        candIdxDoc = cms.string(candIdxDoc),
+        taus = process.tauTable.src,
+        candidates = process.customPFConstituentsTable.src,
+        tauCut = cms.string("") # No need to apply cut here.
+      )
+      process.customizedJetCandsTask.add(process.customTauConstituentsTable)
 
   return process
 
@@ -537,3 +594,6 @@ def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJe
       )
       process.customizedJetCandsTask.add(process.customAK4GenConstituentsTable)
   return process
+
+
+
