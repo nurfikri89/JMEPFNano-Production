@@ -8,7 +8,6 @@ from PhysicsTools.NanoAOD.nano_eras_cff import run2_nanoAOD_ANY
 from PhysicsTools.PatAlgos.tools.jetTools import setupPuppiForPackedPF
 
 from JMEPFNano.Production.setupPFNano import PrepJetConstituents, PrepJetConstituentTables
-from JMEPFNano.Production.setupPFNano import SaveIsoChargedHadronPFCandidates
 from JMEPFNano.Production.setupPFNano import PrepGenJetConstituents, PrepGenJetConstituentTables
 
 def PrepPFNanoAOD(process, runOnMC,
@@ -88,6 +87,9 @@ def PrepPFNanoAOD(process, runOnMC,
     )
   return process
 
+def AddAllGenPartInNano(process):
+  process.genParticleTable.src = "prunedGenParticles"
+  return process
 
 def AddAK4CHSJetsInNano(process):
   process.nanoTableTaskCommon.add(process.jetTask)
