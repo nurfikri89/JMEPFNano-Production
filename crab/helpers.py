@@ -39,8 +39,9 @@ def TrimSecondaryNameForMC(dataset):
   name = name.replace("130X_mcRun3_2023_realistic_postBPix_v2","") #REMOVE GT.
   #
   name = name.replace("NoPU_","_NoPU")#
+  name = name.replace("FlatPU0to120_","_FlatPU0to120")#
   name = name.replace("Poisson60KeepRAW_","_Poisson60KeepRAW")#
-  name = name.replace("EpsilonPU","_Poisson60KeepRAW")#
+  name = name.replace("EpsilonPU_","_EpsilonPU")#
   #
   name = name.replace("_castor_","")#
   name = name.replace("castor_","")#
