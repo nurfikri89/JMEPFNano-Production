@@ -113,7 +113,8 @@ def SaveChargedHadronPFCandidates(process, applyIso=False, runOnMC=False):
     src = cms.InputTag("packedPFCandidates"),
     cut = cms.string(cutStr),
   )
-  process.finalJetsConstituents.src += cms.VInputTag(cms.InputTag("pfChargedHadron"))
+  if hasattr(process,"finalJetsConstituents"):
+    process.finalJetsConstituents.src += cms.VInputTag(cms.InputTag("pfChargedHadron"))
   process.customizedJetCandsTask.add(process.pfChargedHadron)
 
   process.customPFChargedHadronCandidateTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
