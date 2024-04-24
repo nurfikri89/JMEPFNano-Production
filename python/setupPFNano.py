@@ -101,67 +101,54 @@ def PrepJetConstituents(process, saveOnlyPFCandsInJets,
 #########################################################################################################################################################
 def SaveChargedHadronPFCandidates(process, applyIso=False, runOnMC=False):
 
+  pfChargedHadName = "pfChargedHadronSelected"
+  pfChargedHadTableName = "customPFChargedHadronCandidateTable"
+  pfChargedHadExtTableName = "customPFChargedHadronCandidateExtTable"
   cutStr = "abs(pdgId()) == 211"
   tableName = "ChHadPFCand"
   tableDoc  = "Charged Hadron PF candidates"
   if applyIso:
+    pfChargedHadName = "pfIsoChargedHadronSelected"
+    pfChargedHadTableName = "customPFIsoChargedHadronCandidateTable"
+    pfChargedHadExtTableName = "customPFIsoChargedHadronCandidateExtTable"
     cutStr = "isIsolatedChargedHadron()"
     tableName = "IsoChHadPFCand"
     tableDoc  = "Isolated " + tableDoc
 
-  process.pfChargedHadron = cms.EDProducer("PackedCandidatePtrSelector",
-    src = cms.InputTag("packedPFCandidates"),
-    cut = cms.string(cutStr),
-  )
-  if hasattr(process,"finalJetsConstituents"):
-    process.finalJetsConstituents.src += cms.VInputTag(cms.InputTag("pfChargedHadron"))
-  process.customizedJetCandsTask.add(process.pfChargedHadron)
-
-  process.customPFChargedHadronCandidateTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
-    src = cms.InputTag("pfChargedHadron"),
-    cut = cms.string(""), #we should not filter
-    name = cms.string(tableName),
-    doc = cms.string(tableDoc),
-    singleton = cms.bool(False), # the number of entries is variable
-    extension = cms.bool(False), # this is the extension table for the AK8 constituents
-    variables = cms.PSet(
-      # trkQuality = Var("?hasTrackDetails()?bestTrack().qualityMask():0", int, doc="track quality mask"),
-      # trkHighPurity = Var("trackHighPurity()", bool, doc="is trackHighPurity"),
-      # trkAlgo = Var("?hasTrackDetails()?bestTrack().algo():-1", int, doc="track algorithm"),
-      # trkP = Var("?hasTrackDetails()?bestTrack().p():-1", float, doc="track momemtum", precision=-1),
-      # trkPt = Var("?hasTrackDetails()?bestTrack().pt():-1", float, doc="track pt", precision=-1),
-      # trkEta = Var("?hasTrackDetails()?bestTrack().eta():-1", float, doc="track eta", precision=-1),
-      # trkPhi = Var("?hasTrackDetails()?bestTrack().phi():-1", float, doc="track phi", precision=-1),
-      # dz = Var("?hasTrackDetails()?dz():-1", float, doc="dz", precision=15),
-      # dzErr = Var("?hasTrackDetails()?dzError():-1", float, doc="dz err", precision=15),
-      # d0 = Var("?hasTrackDetails()?dxy():-1", float, doc="dxy", precision=15),
-      # d0Err = Var("?hasTrackDetails()?dxyError():-1", float, doc="dxy err", precision=15),
-      # nHits = Var("numberOfHits()", int, doc="numberOfHits()"),
-      # nPixelHits = Var("numberOfPixelHits()", int, doc="numberOfPixelHits()"),
-      # lostInnerHits = Var("lostInnerHits()", int, doc="lost inner hits. -1: validHitInFirstPixelBarrelLayer, 0: noLostInnerHits, 1: oneLostInnerHit, 2: moreLostInnerHits"),
-      # lostOuterHits = Var("?hasTrackDetails()?bestTrack().hitPattern().numberOfLostHits('MISSING_OUTER_HITS'):0", int, doc="lost outer hits"),
-      # trkChi2 = Var("?hasTrackDetails()?bestTrack().normalizedChi2():-1", float, doc="normalized trk chi2", precision=15),
-      # pvAssocQuality = Var("pvAssociationQuality()", int, doc="primary vertex association quality (NotReconstructedPrimary = 0, OtherDeltaZ = 1, CompatibilityBTag = 4, CompatibilityDz = 5, UsedInFitLoose = 6, UsedInFitTight = 7)"),
-      # vertexRef = Var("?vertexRef().isNonnull()?vertexRef().key():-1", int, doc="vertexRef().key()"),
-      # fromPV0 = Var("fromPV()", int, doc="PV0 association (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)"),
-      # vtxChi2 = Var("?hasTrackDetails()?vertexChi2():-1", float, doc="vertex chi2",precision=15),
-      # caloFraction = Var("caloFraction()", bool, doc="(EcalE+HcalE)/candE"),
-      # hcalFraction = Var("hcalFraction()", bool, doc="HcalE/(EcalE+HcalE)"),
-      rawCaloFraction = Var("rawCaloFraction()", float, doc="(rawEcalE+rawHcalE)/candE. Only for isolated charged hadron", precision=15),
-      rawHcalFraction = Var("rawHcalFraction()", float, doc="rawHcalE/(rawEcalE+rawHcalE). Only for isolated charged hadrons", precision=15),
+  setattr(process, pfChargedHadName, cms.EDProducer("PackedCandidatePtrSelector",
+      src = cms.InputTag("packedPFCandidates"),
+      cut = cms.string(cutStr),
     )
   )
-  process.customizedJetCandsTask.add(process.customPFChargedHadronCandidateTable)
+  if hasattr(process,"finalJetsConstituents"):
+    process.finalJetsConstituents.src += cms.VInputTag(cms.InputTag(pfChargedHadName))
+  process.customizedJetCandsTask.add(getattr(process, pfChargedHadName))
 
-  process.customPFChargedHadronCandidateExtTable = cms.EDProducer("SimpleSelectedCandidateTableProducer",
-    name = cms.string(tableName),
-    candIdxName = cms.string("PFCandIdx"),
-    candIdxDoc = cms.string("Index in PFCand table"),
-    candidatesMain = process.customPFConstituentsTable.src,
-    candidatesSelected = process.customPFChargedHadronCandidateTable.src,
-    # pc2gp = cms.InputTag("packedPFCandidateToGenAssociation" if runOnMC else "")
+  setattr(process, pfChargedHadTableName, cms.EDProducer("SimpleCandidateFlatTableProducer",
+      src = cms.InputTag(pfChargedHadName),
+      cut = cms.string(""), #we should not filter
+      name = cms.string(tableName),
+      doc = cms.string(tableDoc),
+      singleton = cms.bool(False), # the number of entries is variable
+      extension = cms.bool(False), # this is the extension table for the AK8 constituents
+      variables = cms.PSet(
+        # rawCaloFraction = Var("rawCaloFraction()", float, doc="(rawEcalE+rawHcalE)/candE. Only for isolated charged hadron", precision=15),
+        # rawHcalFraction = Var("rawHcalFraction()", float, doc="rawHcalE/(rawEcalE+rawHcalE). Only for isolated charged hadrons", precision=15),
+      )
+    )
   )
-  process.customizedJetCandsTask.add(process.customPFChargedHadronCandidateExtTable)
+  process.customizedJetCandsTask.add(getattr(process, pfChargedHadTableName))
+
+  setattr(process, pfChargedHadExtTableName, cms.EDProducer("SimpleSelectedCandidateTableProducer",
+      name = cms.string(tableName),
+      candIdxName = cms.string("PFCandIdx"),
+      candIdxDoc = cms.string("Index in PFCand table"),
+      candidatesMain = process.customPFConstituentsTable.src,
+      candidatesSelected = getattr(process,pfChargedHadTableName).src,
+      # pc2gp = cms.InputTag("packedPFCandidateToGenAssociation" if runOnMC else "")
+    )
+  )
+  process.customizedJetCandsTask.add(getattr(process ,pfChargedHadExtTableName))
 
   return process
 
@@ -187,12 +174,12 @@ def SavePFInfoForElecPhoton(process):
   process.electronTable.variables.pf0eta   =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].eta():-9.",  float, doc="pf0 pt",precision=15)
   process.electronTable.variables.pf0phi   =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].phi():-9.",  float, doc="pf0 pt",precision=15)
   process.electronTable.variables.pf0mass  =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].mass():-1.", float, doc="pf0 pt",precision=15)
-  process.electronTable.variables.pf0pdgId =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].pdgId():0",  int, doc="pf0 pdgid")
+  process.electronTable.variables.pf0pdgId =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].pdgId():0",    int, doc="pf0 pdgid")
   process.electronTable.variables.pf1pt    =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].pt():-1.",   float, doc="pf1 pt",precision=15)
   process.electronTable.variables.pf1eta   =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].eta():-9.",  float, doc="pf1 pt",precision=15)
   process.electronTable.variables.pf1phi   =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].phi():-9.",  float, doc="pf1 pt",precision=15)
   process.electronTable.variables.pf1mass  =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].mass():-1.", float, doc="pf1 pt",precision=15)
-  process.electronTable.variables.pf1pdgId =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].pdgId():0",   int, doc="pf1 pdgid")
+  process.electronTable.variables.pf1pdgId =  Var("?associatedPackedPFCandidates().size()>=2?associatedPackedPFCandidates()[1].pdgId():0",   int,  doc="pf1 pdgid")
 
   process.photonTable.variables.pf0pt     =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].pt():-1.",   float, doc="pf0 pt",precision=15)
   process.photonTable.variables.pf0eta    =  Var("?associatedPackedPFCandidates().size()>=1?associatedPackedPFCandidates()[0].eta():-9.",  float, doc="pf0 pt",precision=15)
@@ -262,8 +249,8 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
       vtxChi2 = Var("?hasTrackDetails()?vertexChi2():-1", float, doc="vertex chi2",precision=15),
       caloFraction = Var("caloFraction()", bool, doc="(EcalE+HcalE)/candE"),
       hcalFraction = Var("hcalFraction()", bool, doc="HcalE/(EcalE+HcalE)"),
-      rawCaloFraction = Var("rawCaloFraction()", float, doc="(rawEcalE+rawHcalE)/candE. Only for isolated charged hadron", precision=15),
-      rawHcalFraction = Var("rawHcalFraction()", float, doc="rawHcalE/(rawEcalE+rawHcalE). Only for isolated charged hadrons", precision=15),
+      rawCaloFraction = Var("rawCaloFraction()", float, doc="(rawEcalE+rawHcalE)/candE. Only for isolated charged hadron", precision=-1),
+      rawHcalFraction = Var("rawHcalFraction()", float, doc="rawHcalE/(rawEcalE+rawHcalE). Only for isolated charged hadrons", precision=-1),
     )
   )
   process.customizedJetCandsTask.add(process.customPFConstituentsTable)
