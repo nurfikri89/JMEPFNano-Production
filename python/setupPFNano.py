@@ -21,7 +21,8 @@ def addProcessAndTask(proc, label, module):
 #
 ######################################################################
 def PrepJetConstituents(process, saveOnlyPFCandsInJets,
-  doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True, doAK8PuppiSubjets=False, doTau=False):
+  doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True, doAK8PuppiSubjets=False,
+  doTau=False, doElectron=False, doPhoton=False, doMuon=False):
 
   if saveOnlyPFCandsInJets:
     #################################################################
@@ -74,6 +75,30 @@ def PrepJetConstituents(process, saveOnlyPFCandsInJets,
       process.customizedJetCandsTask.add(process.finalTausConstituents)
       candList += cms.VInputTag(cms.InputTag("finalTausConstituents", "constituents"))
 
+    if doElectron:
+      process.finalElectronsPFCandsConstituents = cms.EDProducer("PatElectronPFCandSelector",
+        src = cms.InputTag("finalElectrons"),
+        cut = cms.string("") # Store all PF candidates for all taus
+      )
+      process.customizedJetCandsTask.add(process.finalElectronsPFCandsConstituents)
+      candList += cms.VInputTag(cms.InputTag("finalElectronsPFCandsConstituents", "constituents"))
+
+    if doPhoton:
+      process.finalPhotonsPFCandsConstituents = cms.EDProducer("PatPhotonPFCandSelector",
+        src = cms.InputTag("finalPhotons"),
+        cut = cms.string("") # Store all PF candidates for all taus
+      )
+      process.customizedJetCandsTask.add(process.finalPhotonsPFCandsConstituents)
+      candList += cms.VInputTag(cms.InputTag("finalPhotonsPFCandsConstituents", "constituents"))
+
+    if doMuon:
+      process.finalMuonsPFCandsConstituents = cms.EDProducer("PatMuonPFCandSelector",
+        src = cms.InputTag("finalMuons"),
+        cut = cms.string("") # Store all PF candidates for all taus
+      )
+      process.customizedJetCandsTask.add(process.finalMuonsPFCandsConstituents)
+      candList += cms.VInputTag(cms.InputTag("finalMuonsPFCandsConstituents", "constituents"))
+
     #
     # Merge all candidate pointers
     #
@@ -104,9 +129,9 @@ def SaveChargedHadronPFCandidates(process, applyIso=False, runOnMC=False):
   pfChargedHadName = "pfChargedHadronSelected"
   pfChargedHadTableName = "customPFChargedHadronCandidateTable"
   pfChargedHadExtTableName = "customPFChargedHadronCandidateExtTable"
-  cutStr = "abs(pdgId()) == 211"
-  tableName = "ChHadPFCand"
-  tableDoc  = "Charged Hadron PF candidates"
+  cutStr = f"abs(pdgId()) == 211 && ({pfCHS.cut.value()})"
+  tableName = "CHSChHadPFCand"
+  tableDoc  = "Charged Hadron PF candidates with CHS applied"
   if applyIso:
     pfChargedHadName = "pfIsoChargedHadronSelected"
     pfChargedHadTableName = "customPFIsoChargedHadronCandidateTable"
@@ -194,9 +219,15 @@ def SavePFInfoForElecPhoton(process):
   return process
 
 #########################################################################################################################################################
+def SavePFInfoForTau(process):
+
+  return process
+
+#########################################################################################################################################################
 
 def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
-  doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True, doAK8PuppiSubjets=False, doTau=False):
+  doAK8Puppi=True, doAK4Puppi=True, doAK4CHS=True, doAK8PuppiSubjets=False,
+  doTau=False, doElectron=False, doPhoton=False, doMuon=False):
 
   ############################################################
   #
@@ -212,8 +243,12 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
     if doAK8PuppiSubjets:   docStrList += ["AK8PuppiSubjets"]
     docStr += " from following jets: "+", ".join(docStrList)
     docStr += "."
-    if doTau:
-      docStr += "Also from taus."
+    if doTau or doElectron or doPhoton or doMuon:
+      docStr += "Also from "
+      if doTau:     docStr += " taus "
+      if doElectron:docStr += " electrons "
+      if doPhoton:docStr += " photons "
+      if doMuon:docStr += " muons "
 
   process.customPFConstituentsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     src = candInputForTable,
@@ -223,6 +258,7 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
     singleton = cms.bool(False), # the number of entries is variable
     extension = cms.bool(False), # this is the extension table for the AK8 constituents
     variables = cms.PSet(CandVars,
+      energy = Var("energy()", float, doc="energy",precision=-1),
       puppiWeight = Var("puppiWeight()", float, doc="Puppi weight",precision=-1),
       puppiWeightNoLep = Var("puppiWeightNoLep()", float, doc="Puppi weight removing leptons",precision=-1),
       passCHS = Var(pfCHS.cut.value(), bool, doc=pfCHS.cut.value()),
@@ -247,10 +283,10 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
       vertexRef = Var("?vertexRef().isNonnull()?vertexRef().key():-1", int, doc="vertexRef().key()"),
       fromPV0 = Var("fromPV()", int, doc="PV0 association (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)"),
       vtxChi2 = Var("?hasTrackDetails()?vertexChi2():-1", float, doc="vertex chi2",precision=15),
-      caloFraction = Var("caloFraction()", float, doc="(EcalE+HcalE)/candE", precision=-1),
-      hcalFraction = Var("hcalFraction()", float, doc="HcalE/(EcalE+HcalE)", precision=-1),
-      rawCaloFraction = Var("rawCaloFraction()", float, doc="(rawEcalE+rawHcalE)/candE. Only for isolated charged hadron", precision=-1),
-      rawHcalFraction = Var("rawHcalFraction()", float, doc="rawHcalE/(rawEcalE+rawHcalE). Only for isolated charged hadrons", precision=-1),
+      caloFraction = Var("caloFraction()", float, doc="(EcalE+HcalE)/candE", precision=15),
+      hcalFraction = Var("hcalFraction()", float, doc="HcalE/(EcalE+HcalE)", precision=15),
+      rawCaloFraction = Var("rawCaloFraction()", float, doc="(rawEcalE+rawHcalE)/candE. Only for isolated charged hadron", precision=15),
+      rawHcalFraction = Var("rawHcalFraction()", float, doc="rawHcalE/(rawEcalE+rawHcalE). Only for isolated charged hadrons", precision=15),
     )
   )
   process.customizedJetCandsTask.add(process.customPFConstituentsTable)
@@ -316,41 +352,40 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
   # Add the index of the jets (to which a candidate belongs to)
   # in the candidate table.
   #
-  if addJetIdxForConstTable:
-    jetsList = []
-    jetIdxNamesList = []
-    jetIdxDocsList = []
-    jetCutList = []
-    if doAK8Puppi:
-      jetsList += [process.fatJetTable.src.value()]
-      jetIdxNamesList += [process.fatJetTable.name.value()]
-      jetIdxDocsList += [f"Index of the parent jet in {process.fatJetTable.name.value()}"]
-      jetCutList += [""]
-    if doAK8PuppiSubjets:
-      jetsList += [process.subJetTable.src.value()]
-      jetIdxNamesList += [process.subJetTable.name.value()]
-      jetIdxDocsList += [f"Index of the parent jet in {process.subJetTable.name.value()}"]
-      jetCutList += [""]
-    if doAK4Puppi:
-      jetsList += [process.jetPuppiTable.src.value()]
-      jetIdxNamesList += [process.jetPuppiTable.name.value()]
-      jetIdxDocsList += [f"Index of the parent jet in {process.jetPuppiTable.name.value()}"]
-      jetCutList += [""]
-    if doAK4CHS:
-      jetsList += [process.jetTable.src.value()]
-      jetIdxNamesList += [process.jetTable.name.value()]
-      jetIdxDocsList += [f"Index of the parent jet in {process.jetTable.name.value()}"]
-      jetCutList += [""]
-
-    process.customPFConstituentsJetIdxExtTable = cms.EDProducer("CandidatePatJetIdxExtTableProducer",
-      name = process.customPFConstituentsTable.name,
-      candidates = process.customPFConstituentsTable.src,
-      jetsV = cms.VInputTag(jetsList),
-      jetIdxNamesV = cms.vstring(jetIdxNamesList),
-      jetIdxDocsV = cms.vstring(jetIdxDocsList),
-      jetCutV = cms.vstring(jetCutList),
-    )
-    process.customizedJetCandsTask.add(process.customPFConstituentsJetIdxExtTable)
+  # if addJetIdxForConstTable:
+  #   jetsList = []
+  #   jetIdxNamesList = []
+  #   jetIdxDocsList = []
+  #   jetCutList = []
+  #   if doAK8Puppi:
+  #     jetsList += [process.fatJetTable.src.value()]
+  #     jetIdxNamesList += [process.fatJetTable.name.value()]
+  #     jetIdxDocsList += [f"Index of the parent jet in {process.fatJetTable.name.value()}"]
+  #     jetCutList += [""]
+  #   if doAK8PuppiSubjets:
+  #     jetsList += [process.subJetTable.src.value()]
+  #     jetIdxNamesList += [process.subJetTable.name.value()]
+  #     jetIdxDocsList += [f"Index of the parent jet in {process.subJetTable.name.value()}"]
+  #     jetCutList += [""]
+  #   if doAK4Puppi:
+  #     jetsList += [process.jetPuppiTable.src.value()]
+  #     jetIdxNamesList += [process.jetPuppiTable.name.value()]
+  #     jetIdxDocsList += [f"Index of the parent jet in {process.jetPuppiTable.name.value()}"]
+  #     jetCutList += [""]
+  #   if doAK4CHS:
+  #     jetsList += [process.jetTable.src.value()]
+  #     jetIdxNamesList += [process.jetTable.name.value()]
+  #     jetIdxDocsList += [f"Index of the parent jet in {process.jetTable.name.value()}"]
+  #     jetCutList += [""]
+  #   process.customPFConstituentsJetIdxExtTable = cms.EDProducer("CandidatePatJetIdxExtTableProducer",
+  #     name = process.customPFConstituentsTable.name,
+  #     candidates = process.customPFConstituentsTable.src,
+  #     jetsV = cms.VInputTag(jetsList),
+  #     jetIdxNamesV = cms.vstring(jetIdxNamesList),
+  #     jetIdxDocsV = cms.vstring(jetIdxDocsList),
+  #     jetCutV = cms.vstring(jetCutList),
+  #   )
+  #   process.customizedJetCandsTask.add(process.customPFConstituentsJetIdxExtTable)
 
   #
   # Option 2:
@@ -414,6 +449,39 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
         tauCut = cms.string("") # No need to apply cut here.
       )
       process.customizedJetCandsTask.add(process.customTauConstituentsTable)
+
+    if doElectron:
+      process.customElectronPFCandsTable = cms.EDProducer("SimplePatElectronPFCandTableProducer",
+        name = cms.string(f"{process.electronTable.name.value()}PFCand"),
+        candIdxName = cms.string(candIdxName),
+        candIdxDoc = cms.string(candIdxDoc),
+        objects = process.electronTable.src,
+        candidates = process.customPFConstituentsTable.src,
+        objectCut = cms.string("") # No need to apply cut here.
+      )
+      process.customizedJetCandsTask.add(process.customElectronPFCandsTable)
+
+    if doPhoton:
+      process.customPhotonPFCandsTable = cms.EDProducer("SimplePatPhotonPFCandTableProducer",
+        name = cms.string(f"{process.photonTable.name.value()}PFCand"),
+        candIdxName = cms.string(candIdxName),
+        candIdxDoc = cms.string(candIdxDoc),
+        objects = process.photonTable.src,
+        candidates = process.customPFConstituentsTable.src,
+        objectCut = cms.string("") # No need to apply cut here.
+      )
+      process.customizedJetCandsTask.add(process.customPhotonPFCandsTable)
+
+    if doMuon:
+      process.customMuonPFCandsTable = cms.EDProducer("SimplePatMuonPFCandTableProducer",
+        name = cms.string(f"{process.muonTable.name.value()}PFCand"),
+        candIdxName = cms.string(candIdxName),
+        candIdxDoc = cms.string(candIdxDoc),
+        objects = process.muonTable.src,
+        candidates = process.customPFConstituentsTable.src,
+        objectCut = cms.string("") # No need to apply cut here.
+      )
+      process.customizedJetCandsTask.add(process.customMuonPFCandsTable)
 
   return process
 
@@ -603,6 +671,3 @@ def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJe
       )
       process.customizedJetCandsTask.add(process.customAK4GenConstituentsTable)
   return process
-
-
-
