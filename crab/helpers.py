@@ -34,9 +34,11 @@ def TrimSecondaryNameForMC(dataset):
   #
   name = name.replace("Run3Summer23MiniAODv4-","MC23MiniAODv4")#RENAME CAMPAIGN.
   name = name.replace("130X_mcRun3_2023_realistic_v14","") #REMOVE GT.
+  name = name.replace("130X_mcRun3_2023_realistic_v15","") #REMOVE GT.
   #
   name = name.replace("Run3Summer23BPixMiniAODv4-","MC23BPixMiniAODv4")#RENAME CAMPAIGN.
   name = name.replace("130X_mcRun3_2023_realistic_postBPix_v2","") #REMOVE GT.
+  name = name.replace("130X_mcRun3_2023_realistic_postBPix_v6","") #REMOVE GT.
   #
   name = name.replace("NoPU_","_NoPU")#
   name = name.replace("FlatPU0to120_","_FlatPU0to120")#

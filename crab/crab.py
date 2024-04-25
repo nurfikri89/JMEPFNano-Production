@@ -22,7 +22,7 @@ reqNamePrefix = "PFNano12p5"
 #
 # Set version number (CHECK)
 #
-version = "v1p1"
+version = "v2p0"
 #
 # Set a non-empty string if we want to remake a sample but save in a new USER dataset
 #
@@ -32,7 +32,7 @@ prodversion=""
 # Change this PATH where the crab directories are stored
 # Example: config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects/'
 #
-crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano/'
+crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano_2/'
 
 #
 crab_config.JobType.pluginName = 'Analysis'
@@ -129,7 +129,10 @@ for i, dataset in enumerate(samplelist):
   isData = helpers.IsSampleData(dataset)
   if isData:
     # crab_config.JobType.psetName  = 'configs/%s_%s/CustomJMEPFNano_Data22_cfg.py'%(version)
-    crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data22_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    if "Run2022" in dataset and "22Sep2023":
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data22_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    elif "Run2023" in dataset and "22Sep2023":
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data23_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
     crab_config.JobType.maxJobRuntimeMin = runTime_data
     crab_config.Data.unitsPerJob = fileSplit_data
     # Have to make unique requestName.
@@ -153,7 +156,7 @@ for i, dataset in enumerate(samplelist):
       crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22EE_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
     elif "Run3Summer23MiniAODv4" in dataset:
       crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
-    elif "Run3Summer23EEMiniAODv4" in dataset:
+    elif "Run3Summer23BPixMiniAODv4" in dataset:
       crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23BPix_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
 
     crab_config.JobType.maxJobRuntimeMin = runTime_mc
