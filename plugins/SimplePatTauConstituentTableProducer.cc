@@ -78,7 +78,7 @@ void SimplePatTauConstituentTableProducer::produce(edm::Event &iEvent, const edm
   //
   std::vector<int> parentTauIdx;
   std::vector<int> candIdx;
-  std::vector<bool> candIsSignal, candIsIso;
+  std::vector<bool> candIsSignal;
   for (unsigned tauIdx = 0; tauIdx < tausPassCut.size(); ++tauIdx) {
     const auto &tau = tausPassCut.at(tauIdx);
 
@@ -94,7 +94,6 @@ void SimplePatTauConstituentTableProducer::produce(edm::Event &iEvent, const edm
       outCands->push_back(cand);
       parentTauIdx.push_back(tauIdx);
       candIsSignal.push_back(true);
-      candIsIso.push_back(false);
       candIdx.push_back(candInNewList - candPtrs.begin());
     }
 
@@ -110,18 +109,14 @@ void SimplePatTauConstituentTableProducer::produce(edm::Event &iEvent, const edm
       outCands->push_back(cand);
       parentTauIdx.push_back(tauIdx);
       candIsSignal.push_back(false);
-      candIsIso.push_back(true);
       candIdx.push_back(candInNewList - candPtrs.begin());
     }
-
-
   }// end tau loop
 
   auto candTable = std::make_unique<nanoaod::FlatTable>(outCands->size(), name_, false);
   // We fill from here only stuff that cannot be created with the SimpleFlatTableProducer
   candTable->addColumn<int>(candIdxName_, candIdx,      candIdxDoc_);
-  candTable->addColumn<int>("IsSignalCand", candIsSignal, "Is a signal candidate");
-  candTable->addColumn<int>("IsIsolationCand", candIsIso,  "Is an isolation candidate");
+  candTable->addColumn<bool>("IsSignalCand", candIsSignal, "Is signalCand if true, is isolationCand if false");
   std::string parentTauIdxName("tauIdx");
   std::string parentTauIdxDoc("Index of the parent tau");
   candTable->addColumn<int>(parentTauIdxName, parentTauIdx, parentTauIdxDoc);
