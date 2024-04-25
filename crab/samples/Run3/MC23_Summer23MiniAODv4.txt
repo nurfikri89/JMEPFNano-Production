@@ -1,2 +1,8 @@
-/GJet_PT-15to6000_TuneCP5-Flat_13p6TeV_pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v2/MINIAODSIM
-/DYto2L-4Jets_MLL-50_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v1/MINIAODSIM
+###/SingleNeutrino_E-10_gun/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14_ext1-v2/MINIAODSIM
+###//QCD_PT-15to7000_TuneCP5_Flat2022_13p6TeV_pythia8/Run3Summer23MiniAODv4-NoPU_130X_mcRun3_2023_realistic_v15-v5/MINIAODSIM
+###//QCD_PT-15to7000_TuneCP5_Flat2022_13p6TeV_pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v15-v3/MINIAODSIM
+#
+#
+#
+#####/GJet_PT-15to6000_TuneCP5-Flat_13p6TeV_pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v2/MINIAODSIM
+#####/DYto2L-4Jets_MLL-50_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v1/MINIAODSIM
