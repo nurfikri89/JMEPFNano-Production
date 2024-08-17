@@ -17,12 +17,13 @@ crab_config = config()
 #
 # Set request name prefx
 #
-# reqNamePrefix = "JMEPFNano12p5"
-reqNamePrefix = "PFNano12p5"
+reqNamePrefix = "JMEPFNano12p5"
+# reqNamePrefix = "PFNano12p5"
 #
 # Set version number (CHECK)
 #
 version = "v2p0"
+# version = "AllCands_v2p0"
 #
 # Set a non-empty string if we want to remake a sample but save in a new USER dataset
 #
@@ -32,8 +33,7 @@ prodversion=""
 # Change this PATH where the crab directories are stored
 # Example: config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects/'
 #
-crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano_2/'
-
+crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano/'
 #
 crab_config.JobType.pluginName = 'Analysis'
 
@@ -87,11 +87,8 @@ import sys
 import helpers
 from CRABAPI.RawCommand import crabCommand
 
-# runTime_data = 360
-# runTime_mc   = 360
-
-runTime_data = 720
-runTime_mc   = 720
+runTime_data = 990
+runTime_mc   = 990
 
 fileSplit_data = 1
 fileSplit_mc   = 1
@@ -124,40 +121,46 @@ for i, dataset in enumerate(samplelist):
   #
   crab_config.Data.splitting    = 'FileBased'
   #
-  # Check if Data or MC
+  # Check if Data or MC and use the appropriaet psetName
   #
   isData = helpers.IsSampleData(dataset)
   if isData:
     # crab_config.JobType.psetName  = 'configs/%s_%s/CustomJMEPFNano_Data22_cfg.py'%(version)
-    if "Run2022" in dataset and "22Sep2023":
-      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data22_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
-    elif "Run2023" in dataset and "22Sep2023":
-      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data23_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    # if "Run2022" in dataset and "22Sep2023":
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data22_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    # elif "Run2023" in dataset and "22Sep2023":
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data23_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    # if "Run2023" in dataset and "22Sep2023":
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data23_JMEPFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+
     crab_config.JobType.maxJobRuntimeMin = runTime_data
     crab_config.Data.unitsPerJob = fileSplit_data
+    #
     # Have to make unique requestName.
-    # Sample naming convention is a bit dumb and makes this more difficult.
     #
     primaryName   = dataset.split('/')[1]
     secondaryName = helpers.TrimSecondaryNameForData(dataset)
   else:
     # if "Run3Summer22MiniAODv4" in dataset:
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22_JMEPFNano_PFCandGenPartsInAK4AK8.py'%(reqNamePrefix,version)
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22_PFNano_PFCandGenPartAll.py'%(reqNamePrefix,version)
     # elif "Run3Summer22EEMiniAODv4" in dataset:
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC2EE_JMEPFNano_PFCandGenPartsInAK4AK8.py'%(reqNamePrefix,version)
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22EE_PFNano_PFCandGenPartAll.py'%(reqNamePrefix,version)
     # elif "Run3Summer23MiniAODv4" in dataset:
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_JMEPFNano_PFCandGenPartsInAK4AK8.py'%(reqNamePrefix,version)
-    # elif "Run3Summer23EEMiniAODv4" in dataset:
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23BPix_JMEPFNano_PFCandGenPartsInAK4AK8.py'%(reqNamePrefix,version)
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_PFNano_PFCandGenPartAll.py'%(reqNamePrefix,version)
+    # elif "Run3Summer23BPixMiniAODv4" in dataset:
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23BPix_PFNano_PFCandGenPartAll.py'%(reqNamePrefix,version)
     #
-    if "Run3Summer22MiniAODv4" in dataset:
-      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
-    elif "Run3Summer22EEMiniAODv4" in dataset:
-      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22EE_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
-    elif "Run3Summer23MiniAODv4" in dataset:
-      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
-    elif "Run3Summer23BPixMiniAODv4" in dataset:
-      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23BPix_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    # if "Run3Summer22MiniAODv4" in dataset:
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    # elif "Run3Summer22EEMiniAODv4" in dataset:
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22EE_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    # elif "Run3Summer23MiniAODv4" in dataset:
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    # elif "Run3Summer23BPixMiniAODv4" in dataset:
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23BPix_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    #
+    # if "Run3Summer23MiniAODv4" in dataset:
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_JMEPFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
 
     crab_config.JobType.maxJobRuntimeMin = runTime_mc
     crab_config.Data.unitsPerJob = fileSplit_mc
