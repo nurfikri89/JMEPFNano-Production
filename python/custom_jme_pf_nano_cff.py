@@ -12,6 +12,7 @@ from JMEPFNano.Production.setupPFNano import PrepGenJetConstituents, PrepGenJetC
 
 def PrepJMEPFCustomNanoAOD(process, runOnMC,
   saveAK8Puppi=True,saveAK4Puppi=True,saveAK4CHS=True,saveAK8Subjets=False,
+  saveTau=False,saveElectron=False,savePhoton=False,saveMuon=False,
   saveOnlyPFCandsInJets=True,
   saveGenPartCands=False,
   saveAK8GEN=True, saveAK4Gen=True,saveAK8GenSubjets=False,
@@ -30,7 +31,9 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC,
     doAK8Puppi=saveAK8Puppi,
     doAK4Puppi=saveAK4Puppi,
     doAK4CHS=saveAK4CHS,
-    doAK8PuppiSubjets=saveAK8Subjets
+    doAK8PuppiSubjets=saveAK8Subjets,
+    doTau=saveTau,
+    doElectron=saveElectron, doPhoton=savePhoton, doMuon=saveMuon
   )
 
   process = PrepJetConstituentTables(
@@ -40,7 +43,9 @@ def PrepJMEPFCustomNanoAOD(process, runOnMC,
     doAK8Puppi=saveAK8Puppi,
     doAK4Puppi=saveAK4Puppi,
     doAK4CHS=saveAK4CHS,
-    doAK8PuppiSubjets=saveAK8Subjets
+    doAK8PuppiSubjets=saveAK8Subjets,
+    doTau=saveTau,
+    doElectron=saveElectron, doPhoton=savePhoton, doMuon=saveMuon
   )
   process.customPFConstituentsTable.variables.passCHS.expr = process.packedPFCandidateschs.cut.value()
   process.customPFConstituentsTable.variables.passCHS.doc = process.packedPFCandidateschs.cut.value()
@@ -81,6 +86,10 @@ def PrepJMECustomNanoAOD_Common_Extra(process):
   process.jetTable.variables.qgl_mult  =  QGLVARS.qgl_mult
   return process
 
+def PrepJMECustomNanoAOD_Data_Fixes(process):
+  process = PrepJMECustomNanoAOD_Data(process)
+  return process
+
 
 def PrepJMECustomNanoAOD_MC_Fixes(process):
   process = PrepJMECustomNanoAOD_MC(process)
@@ -97,7 +106,7 @@ def PrepJMECustomNanoAOD_MC_Fixes(process):
 #
 ######################################################################
 def PrepJMEPFCustomNanoAOD_SavePFInJets_Data(process):
-  process = PrepJMECustomNanoAOD_Data(process)
+  process = PrepJMECustomNanoAOD_Data_Fixes(process)
   process = PrepJMECustomNanoAOD_Common_Extra(process)
   process = PrepJMEPFCustomNanoAOD(process,runOnMC=False,
     saveOnlyPFCandsInJets=True
@@ -118,7 +127,7 @@ def PrepJMEPFCustomNanoAOD_SavePFInJets_MC(process):
 #
 ######################################################################
 def PrepJMEPFCustomNanoAOD_SavePFAndGenPartInJets_Data(process):
-  process = PrepJMECustomNanoAOD_Data(process)
+  process = PrepJMECustomNanoAOD_Data_Fixes(process)
   process = PrepJMECustomNanoAOD_Common_Extra(process)
   process = PrepJMEPFCustomNanoAOD(process,runOnMC=False,
     saveOnlyPFCandsInJets=True,
@@ -143,7 +152,7 @@ def PrepJMEPFCustomNanoAOD_SavePFAndGenPartInJets_MC(process):
 #
 ######################################################################
 def PrepJMEPFCustomNanoAOD_SavePFAll_Data(process):
-  process = PrepJMECustomNanoAOD_Data(process)
+  process = PrepJMECustomNanoAOD_Data_Fixes(process)
   process = PrepJMECustomNanoAOD_Common_Extra(process)
   process = PrepJMEPFCustomNanoAOD(process,runOnMC=False,
     saveOnlyPFCandsInJets=False
@@ -151,7 +160,7 @@ def PrepJMEPFCustomNanoAOD_SavePFAll_Data(process):
   return process
 
 def PrepJMEPFCustomNanoAOD_SavePFAll_MC(process):
-  process = PrepJMECustomNanoAOD_MC_Fixes(process)
+  process = PrepJMECustomNanoAOD_Data_Fixes(process)
   process = PrepJMECustomNanoAOD_Common_Extra(process)
   process = PrepJMEPFCustomNanoAOD(process,runOnMC=True,
     saveOnlyPFCandsInJets=False
@@ -164,7 +173,7 @@ def PrepJMEPFCustomNanoAOD_SavePFAll_MC(process):
 #
 ######################################################################
 def PrepJMEPFCustomNanoAOD_SavePFAllAndGenPartInJets_Data(process):
-  process = PrepJMECustomNanoAOD_Data(process)
+  process = PrepJMECustomNanoAOD_Data_Fixes(process)
   process = PrepJMECustomNanoAOD_Common_Extra(process)
   process = PrepJMEPFCustomNanoAOD(process,runOnMC=False,
     saveOnlyPFCandsInJets=False,
@@ -189,7 +198,7 @@ def PrepJMEPFCustomNanoAOD_SavePFAllAndGenPartInJets_MC(process):
 #
 ######################################################################
 def PrepJMEPFCustomNanoAOD_SavePFAndGenPartAll_Data(process):
-  process = PrepJMECustomNanoAOD_Data(process)
+  process = PrepJMECustomNanoAOD_Data_Fixes(process)
   process = PrepJMECustomNanoAOD_Common_Extra(process)
   process = PrepJMEPFCustomNanoAOD(process,runOnMC=False,
     saveOnlyPFCandsInJets=False,
