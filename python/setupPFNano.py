@@ -219,7 +219,6 @@ def SavePFInfoForElecPhoton(process):
 
 #########################################################################################################################################################
 def SavePFInfoForTau(process):
-
   return process
 
 #########################################################################################################################################################
@@ -437,6 +436,30 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
       objectCut = cms.string("") # No need to apply cut here.
     )
     process.customizedJetCandsTask.add(process.customMuonPFCandsTable)
+
+  return process
+
+def SavePuppiWeightsFromValueMap(process,puppiLabel="packedpuppi"):
+
+  if not hasattr(process, puppiLabel):
+    excpStr = f"{puppiLabel} not setup but asked to save weight from ValueMap in Nano."
+    excpStr += f"Please check!"
+    raise Exception(excpStr)
+  else:
+    print(f"SavePuppiWeightsFromValueMap()::Saving weights from {puppiLabel} ValueMap")
+
+  process.customPFConstituentsExtTable.srcWeightsV += [
+    cms.InputTag(puppiLabel),
+    cms.InputTag(puppiLabel+"NoLep"),
+  ]
+  process.customPFConstituentsExtTable.weightNamesV += [
+    "puppiWeightValueMap",
+    "puppiWeightNoLepValueMap",
+  ]
+  process.customPFConstituentsExtTable.weightDocsV += [
+    f"Puppi Weight (ValueMap from {puppiLabel} PuppiProducer)",
+    f"Puppi Weight No Lep (ValueMap from {puppiLabel}NoLep PuppiProducer)",
+  ]
 
   return process
 
