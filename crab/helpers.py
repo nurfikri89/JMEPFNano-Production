@@ -40,6 +40,11 @@ def TrimSecondaryNameForMC(dataset):
   name = name.replace("130X_mcRun3_2023_realistic_postBPix_v2","") #REMOVE GT.
   name = name.replace("130X_mcRun3_2023_realistic_postBPix_v6","") #REMOVE GT.
   #
+  name = name.replace("Run3Winter24MiniAOD-","MC24WinterMiniAODv4")#RENAME CAMPAIGN.
+  name = name.replace("133X_mcRun3_2024_realistic_v10","GTv10") #REMOVE GT.
+  name = name.replace("133X_mcRun3_2024_realistic_v9","GTv9") #REMOVE GT.
+  name = name.replace("133X_mcRun3_2024_realistic_v8","GTv8") #REMOVE GT.
+  #
   name = name.replace("NoPU_","_NoPU")#
   name = name.replace("FlatPU0to120_","_FlatPU0to120")#
   name = name.replace("Poisson60KeepRAW_","_Poisson60KeepRAW")#
@@ -52,6 +57,11 @@ def TrimSecondaryNameForMC(dataset):
   name = name.replace("-v2","")#
   name = name.replace("-v3","")#
   name = name.replace("-v4","")# Remove any version indication.There should only be one valid version for MC samples
+  name = name.replace("-v5","")# Remove any version indication.There should only be one valid version for MC samples
+  name = name.replace("-v6","")# Remove any version indication.There should only be one valid version for MC samples
+  name = name.replace("-v7","")# Remove any version indication.There should only be one valid version for MC samples
+  name = name.replace("-v8","")# Remove any version indication.There should only be one valid version for MC samples
+
   return name
 
 def TrimSecondaryNameForData(dataset):
@@ -69,6 +79,7 @@ def TrimSecondaryNameForData(dataset):
 def IsSampleData(dataset):
   name = dataset.split('/')[2]
   isData = False
+  if   "Run2024" in name:isData = True
   if   "Run2023" in name:isData = True
   if   "Run2022" in name:isData = True
   if   "Run2018" in name:isData = True
