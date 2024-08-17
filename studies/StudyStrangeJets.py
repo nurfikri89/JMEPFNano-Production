@@ -24,7 +24,7 @@ XROOTD="root://xrootd-cms.infn.it/"
 # ]
 # inputFilesFinal = [XROOTD+f for f in inputFiles]
 
-inputFilesFinal = ["/afs/cern.ch/work/n/nbinnorj/Samples/Mini/store/mc/Run3Summer23MiniAODv4/QCD_PT-15to7000_TuneCP5_13p6TeV_pythia8/MINIAODSIM/castor_130X_mcRun3_2023_realistic_v14-v1/2560000/7f7c0e56-590b-4f35-be6a-0bfafcc18b48.root"]
+inputFilesFinal = ["/afs/cern.ch/work/n/nbinnorj/Samples/Mini/store/mc/Run3Summer23MiniAODv4/QCD_PT-15to7000_TuneCP5_Flat2022_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v3/2550000/7e2c2abe-4068-4e0d-802b-480acb242d32.root"]
 print(inputFilesFinal[0])
 
 handle_packedGenParts, label_packedGenParts = Handle("std::vector<pat::PackedGenParticle>"), "packedGenParticles"
@@ -47,9 +47,13 @@ def analyseEvent(events, iEvt):
 
   for iJet in range(0,slimmedJetsPuppi.size()):
     jet = slimmedJetsPuppi[iJet]
+    jet_energy_HO = jet.hoEnergy()
+    jet_energyfrac_HO = jet.hoEnergyFraction()
     if not(jet.partonFlavour() == 3): continue
     if not(jet.genJetFwdRef().backRef().isNonnull()): continue
     genJet = jet.genJetFwdRef().backRef()
+    # if not(abs(genJet.eta()) < 1.3): continue
+    # if not(genJet.pt() > 1000): continue
     nGenJetConst = genJet.numberOfDaughters()
 
     genJetConstList = []
@@ -61,13 +65,13 @@ def analyseEvent(events, iEvt):
 
 
     print("============================================================")
-    print(f"{iEvt:<6} | {iJet:<2}: pt = {jet.pt():<6.2f} , eta = {jet.eta():<7.4f} | gen pt = {genJet.pt():<6.2f}")
-    for iConst in range(0, len(genJetConstList)):
-      const = genJetConstList[iConst]
-      if const.motherRef():
-        print(f"{iConst:<2} / {nGenJetConst:<2}: pt = {const.pt():<8.2f} | eta = {const.eta():<7.4f} | phi = {const.phi():<7.4f} | pdgId = {const.pdgId():<6} | mother().pt = {const.motherRef().pt():<6.2f}  | mother().eta = {const.motherRef().eta():<12.4f} | mother().pdgId = {const.motherRef().pdgId():<8} | mother().status = {const.motherRef().status():<1}")
-      else:
-        print("no Mother")
+    print(f"{iEvt:<6} | {iJet:<2}: pt = {jet.pt():<6.2f} , eta = {jet.eta():<7.4f} | gen pt = {genJet.pt():<6.2f} | jet_energy_HO = {jet_energy_HO:<6.2f} | jet_energyfrac_HO = {jet_energyfrac_HO:<7.5f} ")
+    # for iConst in range(0, len(genJetConstList)):
+    #   const = genJetConstList[iConst]
+    #   if const.motherRef():
+    #     print(f"{iConst:<2} / {nGenJetConst:<2}: pt = {const.pt():<8.2f} | eta = {const.eta():<7.4f} | phi = {const.phi():<7.4f} | pdgId = {const.pdgId():<6} | motherRef().key() = {const.motherRef().key():<4} | mother().pt = {const.motherRef().pt():<6.2f}  | mother().eta = {const.motherRef().eta():<12.4f} | mother().pdgId = {const.motherRef().pdgId():<8} | mother().status = {const.motherRef().status():<1}")
+    #   else:
+    #     print("no Mother")
 
 
     # print(f"partonFlavour() == 3 with genJet {genJet}")
