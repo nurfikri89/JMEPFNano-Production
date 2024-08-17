@@ -177,13 +177,13 @@ def AugmentAK4PuppiJetsInNano(process):
   process.jetPuppiTable.variables.hfHadMultiplicity = Var("HFHadronMultiplicity()", "int16", doc="(Puppi-weighted) number of HF Hadrons in the jet")
   process.jetPuppiTable.variables.hfEMMultiplicity  = Var("HFEMMultiplicity()", "int16", doc="(Puppi-weighted) number of HF EMs in the jet")
   process.jetPuppiTable.variables.muMultiplicity    = Var("muonMultiplicity()", "int16", doc="(Puppi-weighted) number of muons in the jet")
-  process.jetPuppiTable.variables.chHEF             = Var("chargedHadronEnergyFraction()", float, doc="charged Hadron Energy Fraction", precision=12),
-  process.jetPuppiTable.variables.neHEF             = Var("neutralHadronEnergyFraction()", float, doc="neutral Hadron Energy Fraction", precision=12),
-  process.jetPuppiTable.variables.chEmEF            = Var("chargedEmEnergyFraction()", float, doc="charged Electromagnetic Energy Fraction", precision=12),
-  process.jetPuppiTable.variables.neEmEF            = Var("neutralEmEnergyFraction()", float, doc="neutral Electromagnetic Energy Fraction", precision=12),
-  process.jetPuppiTable.variables.hfHEF             = Var("HFHadronEnergyFraction()",float, doc="hadronic Energy Fraction in HF",precision=12),
-  process.jetPuppiTable.variables.hfEmEF            = Var("HFEMEnergyFraction()",float, doc="electromagnetic Energy Fraction in HF",precision=12),
-  process.jetPuppiTable.variables.muEF              = Var("muonEnergyFraction()", float, doc="muon Energy Fraction", precision=12),
+  process.jetPuppiTable.variables.chHEF             = Var("chargedHadronEnergyFraction()", float, doc="charged Hadron Energy Fraction", precision=15)
+  process.jetPuppiTable.variables.neHEF             = Var("neutralHadronEnergyFraction()", float, doc="neutral Hadron Energy Fraction", precision=15)
+  process.jetPuppiTable.variables.chEmEF            = Var("chargedEmEnergyFraction()", float, doc="charged Electromagnetic Energy Fraction", precision=15)
+  process.jetPuppiTable.variables.neEmEF            = Var("neutralEmEnergyFraction()", float, doc="neutral Electromagnetic Energy Fraction", precision=15)
+  process.jetPuppiTable.variables.hfHEF             = Var("HFHadronEnergyFraction()",float, doc="hadronic Energy Fraction in HF",precision=15)
+  process.jetPuppiTable.variables.hfEmEF            = Var("HFEMEnergyFraction()",float, doc="electromagnetic Energy Fraction in HF",precision=15)
+  process.jetPuppiTable.variables.muEF              = Var("muonEnergyFraction()", float, doc="muon Energy Fraction", precision=15)
   return process
 
 def AddAK4CHSJetsInNano(process):
@@ -205,13 +205,13 @@ def AddAK4CHSJetsInNano(process):
   process.jetTable.variables.hfHadMultiplicity = Var("HFHadronMultiplicity()", "int16", doc="number of HF Hadrons in the jet")
   process.jetTable.variables.hfEMMultiplicity  = Var("HFEMMultiplicity()", "int16", doc="number of HF EMs in the jet")
   process.jetTable.variables.muMultiplicity    = Var("muonMultiplicity()", "int16", doc="number of muons in the jet")
-  process.jetTable.variables.chHEF             = Var("chargedHadronEnergyFraction()", float, doc="charged Hadron Energy Fraction", precision=12),
-  process.jetTable.variables.neHEF             = Var("neutralHadronEnergyFraction()", float, doc="neutral Hadron Energy Fraction", precision=12),
-  process.jetTable.variables.chEmEF            = Var("chargedEmEnergyFraction()", float, doc="charged Electromagnetic Energy Fraction", precision=12),
-  process.jetTable.variables.neEmEF            = Var("neutralEmEnergyFraction()", float, doc="neutral Electromagnetic Energy Fraction", precision=12),
-  process.jetTable.variables.hfHEF             = Var("HFHadronEnergyFraction()",float, doc="hadronic Energy Fraction in HF",precision=12),
-  process.jetTable.variables.hfEmEF            = Var("HFEMEnergyFraction()",float, doc="electromagnetic Energy Fraction in HF",precision=12),
-  process.jetTable.variables.muEF              = Var("muonEnergyFraction()", float, doc="muon Energy Fraction", precision=12),
+  process.jetTable.variables.chHEF             = Var("chargedHadronEnergyFraction()", float, doc="charged Hadron Energy Fraction", precision=15)
+  process.jetTable.variables.neHEF             = Var("neutralHadronEnergyFraction()", float, doc="neutral Hadron Energy Fraction", precision=15)
+  process.jetTable.variables.chEmEF            = Var("chargedEmEnergyFraction()", float, doc="charged Electromagnetic Energy Fraction", precision=15)
+  process.jetTable.variables.neEmEF            = Var("neutralEmEnergyFraction()", float, doc="neutral Electromagnetic Energy Fraction", precision=15)
+  process.jetTable.variables.hfHEF             = Var("HFHadronEnergyFraction()",float, doc="hadronic Energy Fraction in HF",precision=15)
+  process.jetTable.variables.hfEmEF            = Var("HFEMEnergyFraction()",float, doc="electromagnetic Energy Fraction in HF",precision=15)
+  process.jetTable.variables.muEF              = Var("muonEnergyFraction()", float, doc="muon Energy Fraction", precision=15)
 
   del process.updatedJetsWithUserData.userFloats.leadTrackPt
   del process.updatedJetsWithUserData.userFloats.leptonPtRelv0
@@ -239,9 +239,10 @@ def AddAK4CHSJetsInNano(process):
   del process.jetTable.variables.btagDeepFlavCvL
   del process.jetTable.variables.btagDeepFlavQG
   process.jetCHSMCTable = process.jetMCTable.clone(
-      name=process.jetTable.name,
-      src=process.jetTable.src,
+    name=process.jetTable.name,
+    src=process.jetTable.src,
   )
+  process.jetCHSMCTable.variables.genJetIdx = Var("?genJetFwdRef().backRef().isNonnull()?genJetFwdRef().backRef().key():-1", "int16", doc="index of matched gen jet")
   process.jeCHSMCTask = cms.Task(process.jetCHSMCTable)
   process.jetMCTask = process.jetMCTask.copyAndAdd(process.jeCHSMCTask)
 
