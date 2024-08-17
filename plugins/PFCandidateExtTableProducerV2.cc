@@ -98,9 +98,9 @@ void PFCandidateExtTableProducerV2::produce(edm::Event &iEvent, const edm::Event
   // Loop over ptr-candidate collection
   //
   for (size_t iPtr = 0; iPtr < candPtrs.size(); ++iPtr) {
+    // std::cout << "========================================" << std::endl;
+    // std::cout << iPtr << std::endl;
     auto candPtr = candPtrs[iPtr];
-
-
     //
     // For each ptr-candidate collection, save all
     //
@@ -111,11 +111,17 @@ void PFCandidateExtTableProducerV2::produce(edm::Event &iEvent, const edm::Event
     //
     //
     const reco::Candidate* cand = candPtr.get();
+    // std::cout <<"   | cand = " << cand << std::endl;
+    // std::cout <<"   | cand = " << cand << std::endl;
+    // std::cout <<"   | pt = " << cand->pt() <<" eta = " << cand->eta() << std::endl;
     const pat::PackedCandidate* packedCand = dynamic_cast<const pat::PackedCandidate*>(cand);
+    // std::cout <<"   | packedCand = " << packedCand << std::endl;
+    // if (packedCand == nullptr)
+    //   edm::LogError("PFCandidateExtTableProducerV2") << "This candPtr ("<< iPtr << ") failed to be casted to pat::PackedCandidate!";
 
     if(saveFromPVvertexRef_){
       int fromPV_vertexRef = -1;
-      if (packedCand->vertexRef().isNonnull())
+      if (packedCand != nullptr && packedCand->vertexRef().isNonnull())
         fromPV_vertexRef = packedCand->fromPV(packedCand->vertexRef().key());
       fromPV_vertexRefOutVec.push_back(fromPV_vertexRef);
     }
