@@ -249,6 +249,9 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
       if doPhoton:docStr += " photons "
       if doMuon:docStr += " muons "
 
+  # NOTE:
+  # Can change to "SimplePATCandidateFlatTableProducer" if using CMSSW_14_0_6_patch1 (NanoV14 release)
+  #
   process.customPFConstituentsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     src = candInputForTable,
     cut = cms.string(""), #we should not filter
