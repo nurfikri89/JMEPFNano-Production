@@ -17,16 +17,13 @@ ROOT.gSystem.Load('libDataFormatsFWLite.so')
 # from ProcessSampleHelpers import bookIntBranch, bookFloatArrayBranch, bookDoubleArrayBranch
 # from ProcessSampleHelpers import matchObjectCollection3
 
-
-
 XROOTD="root://xrootd-cms.infn.it/"
-
 # inputFiles=[
 #   "/store/mc/Run3Summer23MiniAODv4/QCD_PT-15to7000_TuneCP5_13p6TeV_pythia8/MINIAODSIM/castor_130X_mcRun3_2023_realistic_v14-v1/2560000/7f7c0e56-590b-4f35-be6a-0bfafcc18b48.root"
 # ]
 # inputFilesFinal = [XROOTD+f for f in inputFiles]
 
-inputFilesFinal = ["/afs/cern.ch/work/n/nbinnorj/Samples/Mini/store/mc/Run3Summer23MiniAODv4/QCD_PT-15to7000_TuneCP5_13p6TeV_pythia8/MINIAODSIM/castor_130X_mcRun3_2023_realistic_v14-v1/2560000/7f7c0e56-590b-4f35-be6a-0bfafcc18b48.root"]
+inputFilesFinal = ["/afs/cern.ch/work/n/nbinnorj/Samples/Mini/store/mc/Run3Summer23MiniAODv4/QCD_PT-15to7000_TuneCP5_Flat2022_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v3/2550000/7e2c2abe-4068-4e0d-802b-480acb242d32.root"]
 print(inputFilesFinal[0])
 
 handle_packedGenParts, label_packedGenParts = Handle("std::vector<pat::PackedGenParticle>"), "packedGenParticles"
