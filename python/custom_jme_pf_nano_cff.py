@@ -6,6 +6,8 @@ from PhysicsTools.NanoAOD.common_cff import Var, CandVars
 from PhysicsTools.NanoAOD.nano_eras_cff import run2_nanoAOD_ANY
 
 from PhysicsTools.NanoAOD.custom_jme_cff import PrepJMECustomNanoAOD_MC, PrepJMECustomNanoAOD_Data
+# Use this and comment out above if use >= CMSSW_14_0_6_patch1
+# from PhysicsTools.NanoAOD.custom_jme_cff import PrepJMECustomNanoAOD
 
 from JMEPFNano.Production.setupPFNano import PrepJetConstituents, PrepJetConstituentTables
 from JMEPFNano.Production.setupPFNano import PrepGenJetConstituents, PrepGenJetConstituentTables
@@ -84,15 +86,38 @@ def PrepJMECustomNanoAOD_Common_Extra(process):
   process.jetTable.variables.qgl_axis2 =  QGLVARS.qgl_axis2
   process.jetTable.variables.qgl_ptD   =  QGLVARS.qgl_ptD
   process.jetTable.variables.qgl_mult  =  QGLVARS.qgl_mult
+  #
+  process.jetTable.variables.chHEF.precision=-1
+  process.jetTable.variables.neHEF.precision=-1
+  process.jetTable.variables.chEmEF.precision=-1
+  process.jetTable.variables.neEmEF.precision=-1
+  process.jetTable.variables.hfHEF.precision=-1
+  process.jetTable.variables.hfEmEF.precision=-1
+  process.jetTable.variables.muEF.precision=-1
+  #
+  if hasattr(process,"jetTableCHS"):
+    process.jetTableCHS.variables.chHEF.precision=-1
+    process.jetTableCHS.variables.neHEF.precision=-1
+    process.jetTableCHS.variables.chEmEF.precision=-1
+    process.jetTableCHS.variables.neEmEF.precision=-1
+    process.jetTableCHS.variables.hfHEF.precision=-1
+    process.jetTableCHS.variables.hfEmEF.precision=-1
+    process.jetTableCHS.variables.muEF.precision=-1
+
   return process
 
 def PrepJMECustomNanoAOD_Data_Fixes(process):
   process = PrepJMECustomNanoAOD_Data(process)
-  return process
+  # Use this and comment out above if use >= CMSSW_14_0_6_patch1
+  # process = PrepJMECustomNanoAOD(process)
 
+  return process
 
 def PrepJMECustomNanoAOD_MC_Fixes(process):
   process = PrepJMECustomNanoAOD_MC(process)
+  # Use this and comment out above if use >= CMSSW_14_0_6_patch1
+  # process = PrepJMECustomNanoAOD(process)
+
   # Fix for NanAODv12_JMENano12p5. To be fixed in future JMENano
   process.jetMCTable.variables.genJetIdx = Var("?genJetFwdRef().backRef().isNonnull()?genJetFwdRef().backRef().key():-1", "int16", doc="index of matched gen jet")
   # Undo this cut removal in future JMENano.
