@@ -5,9 +5,9 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import Var, CandVars
 from PhysicsTools.NanoAOD.nano_eras_cff import run2_nanoAOD_ANY
 
-from PhysicsTools.NanoAOD.custom_jme_cff import PrepJMECustomNanoAOD_MC, PrepJMECustomNanoAOD_Data
+# from PhysicsTools.NanoAOD.custom_jme_cff import PrepJMECustomNanoAOD_MC, PrepJMECustomNanoAOD_Data
 # Use this and comment out above if use >= CMSSW_14_0_6_patch1
-# from PhysicsTools.NanoAOD.custom_jme_cff import PrepJMECustomNanoAOD
+from PhysicsTools.NanoAOD.custom_jme_cff import PrepJMECustomNanoAOD
 
 from JMEPFNano.Production.setupPFNano import PrepJetConstituents, PrepJetConstituentTables
 from JMEPFNano.Production.setupPFNano import PrepGenJetConstituents, PrepGenJetConstituentTables
