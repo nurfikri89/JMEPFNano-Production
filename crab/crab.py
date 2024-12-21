@@ -17,16 +17,16 @@ crab_config = config()
 #
 # Set request name prefx
 #
-reqNamePrefix = "JMEPFNano"
+reqNamePrefix = "JMEPFNano_UL"
 #
 # Set version number (CHECK)
 #
-version = "v1p0"
+version = "v2p1"
 #
 # Change this PATH where the crab directories are stored
 # Example: config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects/'
 #
-crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_9/'
+crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_jmepfnano_UL/'
 #
 crab_config.JobType.pluginName = 'Analysis'
 
@@ -38,8 +38,10 @@ crab_config.JobType.allowUndistributedCMSSW = True
 # Specify the outLFNDirBase and your storage site
 # JetMET CMS EOS space at CERN
 #
-crab_config.Data.outLFNDirBase  = '/store/group/phys_jetmet/nbinnorj/'+reqNamePrefix+'_'+version+'/CRABOUTPUT/'
-crab_config.Site.storageSite    = 'T2_CH_CERN'
+# crab_config.Data.outLFNDirBase  = '/store/group/phys_jetmet/nbinnorj/'+reqNamePrefix+'_'+version+'/CRABOUTPUT/'
+# crab_config.Site.storageSite    = 'T2_CH_CERN'
+crab_config.Data.outLFNDirBase  = '/store/user/nbinnorj/'+reqNamePrefix+'_'+version+'/CRABOUTPUT/'
+crab_config.Site.storageSite    = 'T2_FI_HIP'
 #
 #
 crab_config.Data.ignoreLocality = True
@@ -115,7 +117,18 @@ for i, dataset in enumerate(samplelist):
   #
   isData = helpers.IsSampleData(dataset)
   if isData:
-    crab_config.JobType.psetName  = 'configs/%s/CustomJMEPFNano_DataUL18_cfg.py'%(version)
+    if "2018" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomJMEPFNano_DataUL18_cfg.py'%(reqNamePrefix,version)
+      crab_config.Data.lumiMask = '../data/lumi/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt'
+    elif "2017" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomJMEPFNano_DataUL17_cfg.py'%(reqNamePrefix,version)
+      crab_config.Data.lumiMask = '../data/lumi/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt'
+    elif "2016" in dataset and "HIPM" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomJMEPFNano_DataUL16APV_cfg.py'%(reqNamePrefix,version)
+      crab_config.Data.lumiMask = '../data/lumi/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt'
+    elif "2016" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomJMEPFNano_DataUL16_cfg.py'%(reqNamePrefix,version)
+      crab_config.Data.lumiMask = '../data/lumi/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt'
     crab_config.JobType.maxJobRuntimeMin = runTime_data
     crab_config.Data.unitsPerJob = fileSplit_data
     # Have to make unique requestName.
@@ -124,7 +137,14 @@ for i, dataset in enumerate(samplelist):
     primaryName   = dataset.split('/')[1]
     secondaryName = helpers.TrimSecondaryNameForData(dataset)
   else:
-    crab_config.JobType.psetName  = 'configs/%s/CustomJMEPFNano_MCUL18_cfg.py'%(version)
+    if "RunIISummer20UL18MiniAODv2" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomJMEPFNano_MCUL18_cfg.py'%(reqNamePrefix,version)
+    elif "RunIISummer20UL17MiniAODv2" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomJMEPFNano_MCUL17_cfg.py'%(reqNamePrefix,version)
+    elif "RunIISummer20UL16MiniAODv2" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomJMEPFNano_MCUL16_cfg.py'%(reqNamePrefix,version)
+    elif "RunIISummer20UL16MiniAODAPVv2" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomJMEPFNano_MCUL16APV_cfg.py'%(reqNamePrefix,version)
     crab_config.JobType.maxJobRuntimeMin = runTime_mc 
     crab_config.Data.unitsPerJob = fileSplit_mc
     #
