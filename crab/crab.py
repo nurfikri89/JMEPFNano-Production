@@ -17,12 +17,13 @@ crab_config = config()
 #
 # Set request name prefx
 #
-reqNamePrefix = "JMEPFNano12p5"
+reqNamePrefix = "JMEPFNano14p0"
+# reqNamePrefix = "JMEPFNano12p5"
 # reqNamePrefix = "PFNano12p5"
 #
 # Set version number (CHECK)
 #
-version = "v2p0"
+version = "v1p0"
 # version = "AllCands_v2p0"
 #
 # Set a non-empty string if we want to remake a sample but save in a new USER dataset
@@ -33,7 +34,8 @@ prodversion=""
 # Change this PATH where the crab directories are stored
 # Example: config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects/'
 #
-crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano/'
+# crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano/'
+crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano_v14/'
 #
 crab_config.JobType.pluginName = 'Analysis'
 
@@ -87,8 +89,8 @@ import sys
 import helpers
 from CRABAPI.RawCommand import crabCommand
 
-runTime_data = 990
-runTime_mc   = 990
+runTime_data = 900
+runTime_mc   = 900
 
 fileSplit_data = 1
 fileSplit_mc   = 1
@@ -132,6 +134,8 @@ for i, dataset in enumerate(samplelist):
     #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data23_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
     # if "Run2023" in dataset and "22Sep2023":
     #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data23_JMEPFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    if "Run2024" in dataset and "PromptReco":
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data24_JMEPFNano_PFCandGenPartsInAK4AK8.py'%(reqNamePrefix,version)
 
     crab_config.JobType.maxJobRuntimeMin = runTime_data
     crab_config.Data.unitsPerJob = fileSplit_data
@@ -161,6 +165,9 @@ for i, dataset in enumerate(samplelist):
     #
     # if "Run3Summer23MiniAODv4" in dataset:
     #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_JMEPFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    if "Run3Winter24MiniAOD" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC24Winter_JMEPFNano_PFCandGenPartsInAK4AK8.py'%(reqNamePrefix,version)
+
 
     crab_config.JobType.maxJobRuntimeMin = runTime_mc
     crab_config.Data.unitsPerJob = fileSplit_mc

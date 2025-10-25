@@ -148,6 +148,9 @@ def SaveChargedHadronPFCandidates(process, applyIso=False, runOnMC=False):
     process.finalJetsConstituents.src += cms.VInputTag(cms.InputTag(pfChargedHadName))
   process.customizedJetCandsTask.add(getattr(process, pfChargedHadName))
 
+  # NOTE:
+  # Need to change "SimplePATCandidateFlatTableProducer" if using >= CMSSW_14_0_6_patch1 (NanoV14 release)
+  #
   setattr(process, pfChargedHadTableName, cms.EDProducer("SimpleCandidateFlatTableProducer",
       src = cms.InputTag(pfChargedHadName),
       cut = cms.string(""), #we should not filter
@@ -249,9 +252,10 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
       if doMuon:docStr += " muons "
 
   # NOTE:
-  # Can change to "SimplePATCandidateFlatTableProducer" if using CMSSW_14_0_6_patch1 (NanoV14 release)
+  # Need to change "SimplePATCandidateFlatTableProducer" if using >= CMSSW_14_0_6_patch1 (NanoV14 release)
   #
-  process.customPFConstituentsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+  # process.customPFConstituentsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+  process.customPFConstituentsTable = cms.EDProducer("SimplePATCandidateFlatTableProducer",
     src = candInputForTable,
     cut = cms.string(""), #we should not filter
     name = cms.string("PFCand"),
@@ -264,6 +268,9 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
       puppiWeightNoLep = Var("puppiWeightNoLep()", float, doc="Puppi weight removing leptons",precision=-1),
       passCHS = Var(pfCHS.cut.value(), bool, doc=pfCHS.cut.value()),
       isIsolatedChargedHadron = Var("isIsolatedChargedHadron()", bool, doc="isIsolatedChargedHadron()"),
+      isStandAloneMuon = Var("isStandAloneMuon()", bool, doc="isStandAloneMuon()"),
+      isGlobalMuon = Var("isGlobalMuon()", bool, doc="isGlobalMuon()"),
+      isGoodEgamma = Var("isGoodEgamma()", bool, doc="isGoodEgamma()"),
       trkQuality = Var("?hasTrackDetails()?bestTrack().qualityMask():0", int, doc="track quality mask"),
       trkHighPurity = Var("trackHighPurity()", bool, doc="is trackHighPurity"),
       trkAlgo = Var("?hasTrackDetails()?bestTrack().algo():-1", int, doc="track algorithm"),
@@ -538,11 +545,18 @@ def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJe
   motherGenPartIdxDoc += "This branch is useful to check if a GenPartCand has the same mother with another GenPartCand."
   motherGenPartIdxDoc += "Example would be to check for photons from pi0 decays."
 
-  process.customGenConstituentsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+  # NOTE:
+  # Need to change "simplePATPackedGenParticleFlatTableProducer" if using >= CMSSW_14_0_6_patch1 (NanoV14 release)
+  # - simplePATPackedGenParticleFlatTableProducer is defined in:
+  #   src/JMEPFNano/Production/plugins/SimplePATFlatTableProducerPlugins.cc
+  #
+  # process.customGenConstituentsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+  process.customGenConstituentsTable = cms.EDProducer("SimplePATPackedGenParticleFlatTableProducer",
     src = candInputForTable,
     cut = cms.string(""), #we should not filter
     name = cms.string("GenPartCand"),
     doc = cms.string(docStr),
+    lazyEval = cms.untracked.bool(True),
     singleton = cms.bool(False), # the number of entries is variable
     extension = cms.bool(False), # this is the extension table for the AK8 constituents
     variables = cms.PSet(CandVars,
@@ -559,6 +573,7 @@ def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJe
   ###############################################################################################################
   process.genParticleTable.src = "prunedGenParticles"
   process.genParticleTable.doc = "All gen particles from prunedGenParticles"
+  process.genIso.genPart = "prunedGenParticles" # Need to set this if use >= CMSSW_14_0_6_patch1
 
   # process.customGenParticleConstituentsExtTable = cms.EDProducer("GenParticleCandidateExtTableProducer",
   #   srcGenPartCandidates = process.customGenConstituentsTable.src,
