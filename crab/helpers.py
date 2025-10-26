@@ -19,6 +19,10 @@ def TrimPrimaryNameForMC(dataset):
   name = name.replace("-photos","")
   name = name.replace("FXFX","")
   name = name.replace("_MatchEWPDG20","")
+  name = name.replace("_MatchEWPDG20","")
+  name = name.replace("-t-channel-4FS","")
+  name = name.replace("Bin-","")
+  name = name.replace("Par-","")
   return name
 
 def TrimSecondaryNameForMC(dataset):
@@ -45,6 +49,9 @@ def TrimSecondaryNameForMC(dataset):
   name = name.replace("133X_mcRun3_2024_realistic_v9","GTv9") #REMOVE GT.
   name = name.replace("133X_mcRun3_2024_realistic_v8","GTv8") #REMOVE GT.
   #
+  name = name.replace("RunIII2024Summer24MiniAODv6-","MC24NanoV15")#RENAME CAMPAIGN.
+  name = name.replace("150X_mcRun3_2024_realistic_v2","") #REMOVE GT.
+  #
   name = name.replace("NoPU_","_NoPU")#
   name = name.replace("FlatPU0to120_","_FlatPU0to120")#
   name = name.replace("Poisson60KeepRAW_","_Poisson60KeepRAW")#
@@ -66,6 +73,11 @@ def TrimSecondaryNameForMC(dataset):
 
 def TrimSecondaryNameForData(dataset):
   name = dataset.split('/')[2]
+  if "MINIv6NANOv15" in dataset:
+    name = name.replace("-v1","")#
+    name = name.replace("-v2","")#
+    name = name.replace("-v3","")#
+    name = name.replace("MINIv6NANOv15", "NanoV15") #CHECK
   #
   # Note: For PromptReco, we do need the version as different versions 
   # means different run number ranges.
@@ -79,11 +91,12 @@ def TrimSecondaryNameForData(dataset):
 def IsSampleData(dataset):
   name = dataset.split('/')[2]
   isData = False
-  if   "Run2024" in name:isData = True
-  if   "Run2023" in name:isData = True
-  if   "Run2022" in name:isData = True
-  if   "Run2018" in name:isData = True
-  if   "Run2017" in name:isData = True
-  if   "Run2016" in name:isData = True
+  if     "Run2025" in name:isData = True
+  elif   "Run2024" in name:isData = True
+  elif   "Run2023" in name:isData = True
+  elif   "Run2022" in name:isData = True
+  elif   "Run2018" in name:isData = True
+  elif   "Run2017" in name:isData = True
+  elif   "Run2016" in name:isData = True
   return isData
 
