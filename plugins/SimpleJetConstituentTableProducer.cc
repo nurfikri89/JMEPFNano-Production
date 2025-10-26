@@ -130,8 +130,8 @@ void SimpleJetConstituentTableProducer<T>::fillDescriptions(edm::ConfigurationDe
   descriptions.addWithDefaultLabel(desc);
 }
 
-typedef SimpleJetConstituentTableProducer<pat::Jet> SimplePatJetConstituentTableProducer;
-typedef SimpleJetConstituentTableProducer<reco::GenJet> SimpleGenJetConstituentTableProducer;
+typedef SimpleJetConstituentTableProducer<pat::Jet> CustomSimplePatJetConstituentTableProducer;
+typedef SimpleJetConstituentTableProducer<reco::GenJet> CustomSimpleGenJetConstituentTableProducer;
 
-DEFINE_FWK_MODULE(SimplePatJetConstituentTableProducer);
-DEFINE_FWK_MODULE(SimpleGenJetConstituentTableProducer);
+DEFINE_FWK_MODULE(CustomSimplePatJetConstituentTableProducer);
+DEFINE_FWK_MODULE(CustomSimpleGenJetConstituentTableProducer);
