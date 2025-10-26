@@ -24,7 +24,7 @@ def ApplySkimHighPtJets(process):
   #
   ######################################################################
   process.highPtJetsUpdatedJetsPuppi = cms.EDFilter("CandViewRefSelector",
-    src = cms.InputTag("updatedJetsPuppi"), # Defined in jetsAK4_Pupp_cff.py
+    src = cms.InputTag("updatedJetsPuppi"), # Defined in jetsAK4_Puppi_cff.py
     cut = cms.string("pt > 800 && abs(eta) < 5.0")
   )
 
