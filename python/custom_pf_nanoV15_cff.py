@@ -1,5 +1,5 @@
 #
-# Compatible with NanoV12 and JMENanoV12p5. Tested with MiniAODv4 using CMSSW_13_2_6_patch2
+# Compatible with NanoV15 and JMENanoV15. Tested with MiniAODv6 using CMSSW_15_0_14_patch4
 #
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import Var, CandVars
@@ -88,7 +88,6 @@ def PrepPFNanoAOD(process, runOnMC,
       doAK4=saveAK4Gen,
       doAK8Subjets=saveAK8Subjets
     )
-    process = ExtendGenVisTauTable(process)
   return process
 
 def AddAllGenPartInNano(process):

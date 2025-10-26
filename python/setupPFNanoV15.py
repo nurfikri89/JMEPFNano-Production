@@ -73,15 +73,15 @@ def PrepJetConstituents(process, saveOnlyPFCandsInJets,
         cut = cms.string("") # Store all PF candidates for all taus
       )
       process.customizedJetCandsTask.add(process.finalTausConstituentsPFNano)
-      candList += cms.VInputTag(cms.InputTag("finalTausConstituents", "constituents"))
+      candList += cms.VInputTag(cms.InputTag("finalTausConstituentsPFNano", "constituents"))
 
     if doElectron:
-      process.finalElectronsPFCandConstituents = cms.EDProducer("PatElectronPFCandSelector",
+      process.finalElectronsPFCandConstituentsPFNano = cms.EDProducer("PatElectronPFCandSelector",
         src = cms.InputTag("finalElectrons"),
         cut = cms.string("") # Store all PF candidates for all taus
       )
-      process.customizedJetCandsTask.add(process.finalElectronsPFCandConstituents)
-      candList += cms.VInputTag(cms.InputTag("finalElectronsPFCandConstituents", "constituents"))
+      process.customizedJetCandsTask.add(process.finalElectronsPFCandConstituentsPFNano)
+      candList += cms.VInputTag(cms.InputTag("finalElectronsPFCandConstituentsPFNano", "constituents"))
 
     if doPhoton:
       process.finalPhotonsPFCandConstituentsPFNano = cms.EDProducer("PatPhotonPFCandSelector",
@@ -124,21 +124,20 @@ def PrepJetConstituents(process, saveOnlyPFCandsInJets,
   return process, candInputForTable
 
 #########################################################################################################################################################
-def SaveChargedHadronPFCandidates(process, applyIso=False, runOnMC=False):
+def SaveChargedHadronPFCandidates(process, ptcut="5", applyCHS=False, applyIso=False, runOnMC=False):
 
   pfChargedHadName = "pfChargedHadronSelected"
   pfChargedHadTableName = "customPFChargedHadronCandidateTable"
   pfChargedHadExtTableName = "customPFChargedHadronCandidateExtTable"
-  cutStr = f"abs(pdgId()) == 211 && ({pfCHS.cut.value()})"
-  tableName = "CHSChHadPFCand"
-  tableDoc  = "Charged Hadron PF candidates with CHS applied"
+  cutStr    = f"(abs(pdgId()) == 211 && (pt >= {ptcut}))"
+  tableName = "SelectedChHadPFCandV2"
+  tableDoc  = f"Charged Hadron PF candidates. Selection: pt >= {ptcut}"
+  if applyCHS:
+    cutStr    += f" && ({pfCHS.cut.value()})"
+    tableDoc  = tableDoc + ", pass CHS"
   if applyIso:
-    pfChargedHadName = "pfIsoChargedHadronSelected"
-    pfChargedHadTableName = "customPFIsoChargedHadronCandidateTable"
-    pfChargedHadExtTableName = "customPFIsoChargedHadronCandidateExtTable"
-    cutStr = "isIsolatedChargedHadron()"
-    tableName = "IsoChHadPFCand"
-    tableDoc  = "Isolated " + tableDoc
+    cutStr    += f" && (isIsolatedChargedHadron())"
+    tableDoc  = tableDoc + ", isIsolatedChargedHadron()"
 
   setattr(process, pfChargedHadName, cms.EDProducer("PackedCandidatePtrSelector",
       src = cms.InputTag("packedPFCandidates"),
@@ -186,20 +185,36 @@ def SaveChargedHadronPFCandidates(process, applyIso=False, runOnMC=False):
 
   return process
 
+def SaveChargedHadronPFCandidates_MC(process):
+  process = SaveChargedHadronPFCandidates(process,applyCHS=False,applyIso=False,runOnMC=True)
+  return process
+
+def SaveChargedHadronPFCandidates_Data(process):
+  process = SaveChargedHadronPFCandidates(process,applyCHS=False,applyIso=False,runOnMC=False)
+  return process
+
+def SaveCHSIsoChargedHadronPFCandidates_MC(process):
+  process = SaveChargedHadronPFCandidates(process, applyCHS=True,applyIso=True,runOnMC=True)
+  return process
+
+def SaveCHSIsoChargedHadronPFCandidates_Data(process):
+  process = SaveChargedHadronPFCandidates(process, applyCHS=True,applyIso=True,runOnMC=False)
+  return process
+
+def SaveCHSChargedHadronPFCandidates_MC(process):
+  process = SaveChargedHadronPFCandidates(process, applyCHS=True,runOnMC=True)
+  return process
+
+def SaveCHSChargedHadronPFCandidates_Data(process):
+  process = SaveChargedHadronPFCandidates(process, applyCHS=True,runOnMC=False)
+  return process
+
 def SaveIsoChargedHadronPFCandidates_MC(process):
   process = SaveChargedHadronPFCandidates(process, applyIso=True,runOnMC=True)
   return process
 
 def SaveIsoChargedHadronPFCandidates_Data(process):
   process = SaveChargedHadronPFCandidates(process, applyIso=True,runOnMC=False)
-  return process
-
-def SaveChargedHadronPFCandidates_MC(process):
-  process = SaveChargedHadronPFCandidates(process, applyIso=False,runOnMC=True)
-  return process
-
-def SaveChargedHadronPFCandidates_Data(process):
-  process = SaveChargedHadronPFCandidates(process, applyIso=False,runOnMC=False)
   return process
 
 #########################################################################################################################################################
@@ -451,6 +466,35 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
 
   return process
 
+def ReducedPFCandInfo(process):
+
+  process.customPFConstituentsPFNanoTable.variables.pt.precision   = 12
+  process.customPFConstituentsPFNanoTable.variables.eta.precision  = 12
+  process.customPFConstituentsPFNanoTable.variables.phi.precision  = 12
+  process.customPFConstituentsPFNanoTable.variables.mass.precision = 12
+
+  process.customPFConstituentsPFNanoTable.variables.dz.precision = 12
+  process.customPFConstituentsPFNanoTable.variables.dzErr.precision = 12
+  process.customPFConstituentsPFNanoTable.variables.d0.precision = 12
+  process.customPFConstituentsPFNanoTable.variables.d0Err.precision = 12
+
+  del process.customPFConstituentsPFNanoTable.variables.trkQuality
+  del process.customPFConstituentsPFNanoTable.variables.trkHighPurity
+  del process.customPFConstituentsPFNanoTable.variables.trkAlgo
+
+  del process.customPFConstituentsPFNanoTable.variables.energy
+  del process.customPFConstituentsPFNanoTable.variables.isIsolatedChargedHadron
+  del process.customPFConstituentsPFNanoTable.variables.nHits
+  del process.customPFConstituentsPFNanoTable.variables.nPixelHits
+  del process.customPFConstituentsPFNanoTable.variables.lostInnerHits
+  del process.customPFConstituentsPFNanoTable.variables.lostOuterHits
+  del process.customPFConstituentsPFNanoTable.variables.caloFraction
+  del process.customPFConstituentsPFNanoTable.variables.hcalFraction
+  del process.customPFConstituentsPFNanoTable.variables.rawCaloFraction
+  del process.customPFConstituentsPFNanoTable.variables.rawHcalFraction
+
+  return process
+
 def SavePuppiWeightsFromValueMap(process,puppiLabel="packedpuppi"):
 
   if not hasattr(process, puppiLabel):
@@ -491,7 +535,7 @@ def PrepGenJetConstituents(process, saveOnlyGenCandsInJets,
         cut = process.genJetAK8Table.cut
       )
       process.customizedJetCandsTask.add(process.genJetsAK8ConstituentsPFNano)
-      genCandList += cms.VInputTag(cms.InputTag("genJetsAK8Constituents", "constituents"))
+      genCandList += cms.VInputTag(cms.InputTag("genJetsAK8ConstituentsPFNano", "constituents"))
 
     if doAK8Subjets:
       # Collect AK8 Gen Subjet Constituents pointers
@@ -618,7 +662,7 @@ def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJe
   ###############################################################################################################
   process.genParticleTable.src = "prunedGenParticles"
   process.genParticleTable.doc = "All gen particles from prunedGenParticles collection"
-  process.genIso.genPart = "prunedGenParticles" # Need to set this if use >= CMSSW_14_0_6_patch1
+  process.genIso.genPart = "prunedGenParticles"
 
   # process.customGenPartConstituentsPFNanoExtTable = cms.EDProducer("GenParticleCandidateExtTableProducer",
   #   srcGenPartCandidates = process.customGenPartConstituentsPFNanoTable.src,
@@ -631,6 +675,18 @@ def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJe
   process.customGenPartConstituentsPFNanoTable.variables.eta.precision = -1
   process.customGenPartConstituentsPFNanoTable.variables.phi.precision = -1
   process.customGenPartConstituentsPFNanoTable.variables.mass.precision = -1
+
+  # Add more branch for genParticleTable
+  process.genParticleTable.variables.vx = Var("vx", float , doc="x coordinate of vertex position", precision=12)
+  process.genParticleTable.variables.vy = Var("vy", float , doc="y coordinate of vertex position", precision=12)
+  process.genParticleTable.variables.vz = Var("vz", float , doc="z coordinate of vertex position", precision=12)
+  process.genParticleTable.variables.genPartIdxMother2 = Var("?numberOfMothers>1?motherRef(1).key():-1", "int", doc="index of the second mother particle, if valid")
+
+  # Modify p4 branches
+  process.genParticleTable.variables.pt.precision  = 12
+  process.genParticleTable.variables.eta.precision = 12
+  process.genParticleTable.variables.phi.precision = 12
+  process.genParticleTable.variables.mass = Var("mass", float, precision=12)
 
   ############################################################
   #
@@ -674,11 +730,37 @@ def PrepGenJetConstituentTables(process, candInputForTable, saveOnlyGenCandsInJe
     process.customizedJetCandsTask.add(process.customAK4GenConstituentsPFNanoTable)
   return process
 
+def ReducedGenPartCandInfo(process):
+  process.customGenPartConstituentsPFNanoTable.variables.pt.precision = 12
+  process.customGenPartConstituentsPFNanoTable.variables.eta.precision = 12
+  process.customGenPartConstituentsPFNanoTable.variables.phi.precision = 12
+  process.customGenPartConstituentsPFNanoTable.variables.mass.precision = 12
+
+  process.genParticleTable.variables.pt.precision = 12
+  process.genParticleTable.variables.eta.precision = 12
+  process.genParticleTable.variables.phi.precision = 12
+  process.genParticleTable.variables.mass.precision = 12
+
+  del process.genParticleTable.variables.genPartIdxMother2
+
+  return process
+#
+# https://cmssdt.cern.ch/lxr/source/PhysicsTools/NanoAOD/python/btvMC_cff.py
+#
+def AddBTVInfoForMC(process):
+  process.btvMCTable = cms.EDProducer("BTVMCFlavourTableProducer",
+    name=process.jetPuppiTable.name,
+    src=process.jetPuppiTable.src,
+    genparticles=cms.InputTag("prunedGenParticles")
+  )
+  process.jetMCTask.add(process.btvMCTable)
+  return process
+
 def ExtendGenVisTauTable(process):
 
   # https://github.com/cms-sw/cmssw/blob/CMSSW_15_0_15_patch4/PhysicsTools/NanoAOD/python/taus_cff.py#L168
   # Lower the gen visible tau pt cut from 10 GeV to 5 GeV
-  # process.genVisTauTable.cut = "pt > 5."
+  process.genVisTauTable.cut = "pt > 5."
 
   process.genVisTauExtTable = cms.EDProducer("GenVisTauExtTableProducer",
     srcGenVisTaus = cms.InputTag("genVisTaus"),
