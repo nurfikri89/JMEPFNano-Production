@@ -140,6 +140,7 @@ def AddCaloJets(process,runOnMC=False):
   process.jetCaloTable.variables.mass.precision=10
   # process.jetCaloTable.variables.rawFactor.precision=10
 
+
   # process.jetCaloMCTable = simpleCandidateFlatTableProducer.clone(
   #   src = process.jetCaloTable.src,
   #   name = process.jetCaloTable.name,

@@ -36,9 +36,14 @@ private:
 
   edm::EDGetTokenT<reco::CandidateView> candMain_token_;
   edm::EDGetTokenT<reco::CandidateView> candSelected_token_;
-  edm::EDGetTokenT<edm::Association<reco::GenParticleCollection>> pc2gp_token_;
+  // edm::EDGetTokenT<edm::Association<reco::GenParticleCollection>> pc2gp_token_;
 
-  bool getGenInfo_;
+  bool doIsoCands_;
+  double maxDeltaR_;
+  std::string nameIsoMap_;
+  double maxDeltaR2_;
+
+  // bool getGenInfo_;
 
   edm::Handle<reco::CandidateView> candMain_;
   edm::Handle<reco::CandidateView> candSelected_;
@@ -53,7 +58,8 @@ SimpleSelectedCandidateTableProducer::SimpleSelectedCandidateTableProducer(const
   candIdxName_(iConfig.getParameter<std::string>("candIdxName")),
   candIdxDoc_(iConfig.getParameter<std::string>("candIdxDoc")),
   candMain_token_(consumes<reco::CandidateView>(iConfig.getParameter<edm::InputTag>("candidatesMain"))),
-  candSelected_token_(consumes<reco::CandidateView>(iConfig.getParameter<edm::InputTag>("candidatesSelected")))
+  candSelected_token_(consumes<reco::CandidateView>(iConfig.getParameter<edm::InputTag>("candidatesSelected"))),
+  doIsoCands_(iConfig.getParameter<bool>("doIsoCands"))
 {
   // getGenInfo_=false;
   // edm::InputTag pc2gpInputTag = iConfig.getParameter<edm::InputTag>("pc2gp");
@@ -64,6 +70,13 @@ SimpleSelectedCandidateTableProducer::SimpleSelectedCandidateTableProducer(const
 
   produces<nanoaod::FlatTable>(name_);
   produces<std::vector<reco::CandidatePtr>>();
+
+  if (doIsoCands_){
+    maxDeltaR_ = iConfig.getParameter<double>("maxDeltaR");
+    nameIsoMap_ = iConfig.getParameter<std::string>("nameIsoMap");
+    maxDeltaR2_ = maxDeltaR_ * maxDeltaR_;
+    produces<nanoaod::FlatTable>(nameIsoMap_);
+  }
 }
 
 SimpleSelectedCandidateTableProducer::~SimpleSelectedCandidateTableProducer() {}
@@ -78,6 +91,8 @@ void SimpleSelectedCandidateTableProducer::produce(edm::Event &iEvent, const edm
   iEvent.getByToken(candSelected_token_, candSelected_);
   auto candSelectedPtrs = candSelected_->ptrs();
 
+  // std::cout << " SimpleSelectedCandidateTableProducer candMainPtrs.size = " << candMainPtrs.size() << std::endl;
+
   // if (getGenInfo_){
   //   iEvent.getByToken(pc2gp_token_, pc2gp_);
   //   const auto& packedCandToGenParticles = *pc2gp_;
@@ -87,6 +102,7 @@ void SimpleSelectedCandidateTableProducer::produce(edm::Event &iEvent, const edm
   // Loop over selected candidates
   //
   std::vector<int> candIdx;
+
 
   // std::vector<float> genPartAssoc_pt;
   // std::vector<float> genPartAssoc_eta;
@@ -142,6 +158,30 @@ void SimpleSelectedCandidateTableProducer::produce(edm::Event &iEvent, const edm
 
   iEvent.put(std::move(candTable), name_);
   iEvent.put(std::move(outCands));
+
+  //
+  // We do this to map selected candidate 
+  //
+  if (doIsoCands_){
+    std::vector<int> candSelIdx_forIsoMap;
+    std::vector<int> candIsoIdx_forIsoMap;
+    for (unsigned candSelectedIdx = 0; candSelectedIdx < candSelectedPtrs.size(); candSelectedIdx++) {
+      const auto& candSelected = candSelectedPtrs.at(candSelectedIdx);
+      for (unsigned candMainIdx = 0; candMainIdx < candMainPtrs.size(); candMainIdx++) {
+        const auto& candMain = candMainPtrs.at(candMainIdx);
+        float dR2 = deltaR2(candSelected->p4(), candMain->p4());
+        if (dR2 <= maxDeltaR2_){
+          candSelIdx_forIsoMap.emplace_back(candSelectedIdx);
+          candIsoIdx_forIsoMap.emplace_back(candMainIdx);
+        }
+      }
+    }
+
+    auto candTableIsoCandMap = std::make_unique<nanoaod::FlatTable>(candSelIdx_forIsoMap.size(), nameIsoMap_, false, false);
+    candTableIsoCandMap->addColumn<int>(name_+"Idx",  candSelIdx_forIsoMap, "Idx to selected candidate collection");
+    candTableIsoCandMap->addColumn<int>(candIdxName_, candIsoIdx_forIsoMap, "Idx to main candidate collection");
+    iEvent.put(std::move(candTableIsoCandMap), nameIsoMap_);
+  }
 }
 
 void SimpleSelectedCandidateTableProducer::fillDescriptions(edm::ConfigurationDescriptions &descriptions) {
@@ -152,6 +192,10 @@ void SimpleSelectedCandidateTableProducer::fillDescriptions(edm::ConfigurationDe
   desc.add<edm::InputTag>("candidatesMain", edm::InputTag("packedPFCandidates"));
   desc.add<edm::InputTag>("candidatesSelected", edm::InputTag("packedPFCandidates"));
   // desc.add<edm::InputTag>("pc2gp", edm::InputTag(""));
+  desc.add<bool>("doIsoCands", false);
+  desc.add<double>("maxDeltaR", -1.);
+  desc.add<std::string>("nameIsoMap", "");
+
   descriptions.addWithDefaultLabel(desc);
 }
 

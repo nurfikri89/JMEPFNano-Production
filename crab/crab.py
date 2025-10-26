@@ -22,8 +22,11 @@ reqNamePrefix = "JMEPFNano12p5"
 #
 # Set version number (CHECK)
 #
-version = "v2p0"
+# version = "IsoChgHadOnly_SkimHLTMET_v3p0"
+# version = "IsoChgHadOnly_v3p1"
 # version = "AllCands_v2p0"
+version = "v2p0"
+isSkimJob=False #CHECK
 #
 # Set a non-empty string if we want to remake a sample but save in a new USER dataset
 #
@@ -33,7 +36,7 @@ prodversion=""
 # Change this PATH where the crab directories are stored
 # Example: config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects/'
 #
-crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano/'
+crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_jmepfnano_mc/'
 #
 crab_config.JobType.pluginName = 'Analysis'
 
@@ -77,6 +80,25 @@ whitelist_sites=[
 'T2_FI_*',
 ]
 crab_config.Site.whitelist = whitelist_sites
+############################################################
+# Part 1.a
+# -  For skim
+#
+############################################################
+runTime_data = 600
+runTime_mc   = 600
+fileSplit_data = 1
+fileSplit_mc   = 1
+
+inputFilesForSkimMC = [
+  'scriptsForSkimJobs/CustomPFNano_OnlyGenTableTask.py'
+]
+scriptExePath = 'scriptsForSkimJobs/ScriptExe.sh'
+if isSkimJob:
+  runTime_data = 300
+  runTime_mc   = 300
+  fileSplit_data = 1
+  fileSplit_mc   = 1
 
 ############################################################
 # Part 2
@@ -86,12 +108,6 @@ crab_config.Site.whitelist = whitelist_sites
 import sys
 import helpers
 from CRABAPI.RawCommand import crabCommand
-
-runTime_data = 990
-runTime_mc   = 990
-
-fileSplit_data = 1
-fileSplit_mc   = 1
 
 #
 # Read in txt file with list of samples
@@ -125,13 +141,21 @@ for i, dataset in enumerate(samplelist):
   #
   isData = helpers.IsSampleData(dataset)
   if isData:
-    # crab_config.JobType.psetName  = 'configs/%s_%s/CustomJMEPFNano_Data22_cfg.py'%(version)
+    # crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data22_cfg.py'%(version)
+    if "Run2023" in dataset and "22Sep2023":
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data23_JMEPFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+      crab_config.Data.lumiMask = '../data/lumi/Cert_Collisions2023_366442_370790_Golden.json'
+      # crab_config.Data.splitting    = 'LumiBased'
+    elif "Run2022" in dataset and "22Sep2023":
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data22_JMEPFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+      crab_config.Data.lumiMask = '../data/lumi/Cert_Collisions2022_355100_362760_Golden.json'
+      # crab_config.Data.splitting    = 'LumiBased'
     # if "Run2022" in dataset and "22Sep2023":
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data22_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data22.py'%(reqNamePrefix,version)
+    #   crab_config.Data.lumiMask = '../data/lumi/Cert_Collisions2023_366442_370790_Golden.json'
     # elif "Run2023" in dataset and "22Sep2023":
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data23_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
-    # if "Run2023" in dataset and "22Sep2023":
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data23_JMEPFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_Data23.py'%(reqNamePrefix,version)
+    #   crab_config.Data.lumiMask = '../data/lumi/Cert_Collisions2022_355100_362760_Golden.json'
 
     crab_config.JobType.maxJobRuntimeMin = runTime_data
     crab_config.Data.unitsPerJob = fileSplit_data
@@ -142,22 +166,25 @@ for i, dataset in enumerate(samplelist):
     secondaryName = helpers.TrimSecondaryNameForData(dataset)
   else:
     # if "Run3Summer22MiniAODv4" in dataset:
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22_PFNano_PFCandGenPartAll.py'%(reqNamePrefix,version)
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22.py'%(reqNamePrefix,version)
     # elif "Run3Summer22EEMiniAODv4" in dataset:
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22EE_PFNano_PFCandGenPartAll.py'%(reqNamePrefix,version)
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22EE.py'%(reqNamePrefix,version)
     # elif "Run3Summer23MiniAODv4" in dataset:
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_PFNano_PFCandGenPartAll.py'%(reqNamePrefix,version)
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23.py'%(reqNamePrefix,version)
     # elif "Run3Summer23BPixMiniAODv4" in dataset:
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23BPix_PFNano_PFCandGenPartAll.py'%(reqNamePrefix,version)
+    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23BPix.py'%(reqNamePrefix,version)
+    # if isSkimJob:
+    #   crab_config.JobType.inputFiles = inputFilesForSkimMC
+    #   crab_config.JobType.scriptExe = scriptExePath
     #
-    # if "Run3Summer22MiniAODv4" in dataset:
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
-    # elif "Run3Summer22EEMiniAODv4" in dataset:
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22EE_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
-    # elif "Run3Summer23MiniAODv4" in dataset:
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
-    # elif "Run3Summer23BPixMiniAODv4" in dataset:
-    #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23BPix_PFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    if "Run3Summer22MiniAODv4" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22_JMEPFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    elif "Run3Summer22EEMiniAODv4" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC22EE_JMEPFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    elif "Run3Summer23MiniAODv4" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_JMEPFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
+    elif "Run3Summer23BPixMiniAODv4" in dataset:
+      crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23BPix_JMEPFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)
     #
     # if "Run3Summer23MiniAODv4" in dataset:
     #   crab_config.JobType.psetName  = 'configs/%s_%s/CustomPFNano_MC23_JMEPFNano_PFCandGenPartsInAK4AK8_IsoChHad.py'%(reqNamePrefix,version)

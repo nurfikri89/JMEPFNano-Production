@@ -1,0 +1,43 @@
+DEBUG 2024-09-28 07:14:43.592 UTC: 	 CRAB Client version: v3.240621
+DEBUG 2024-09-28 07:14:43.593 UTC: 	 Running on: Linux lxplus819.cern.ch 4.18.0-553.16.1.el8_10.x86_64 #1 SMP Thu Aug 1 04:16:12 EDT 2024 x86_64 x86_64 x86_64 GNU/Linux - Red Hat Enterprise Linux 8.10 (Ootpa)
+DEBUG 2024-09-28 07:14:43.593 UTC: 	 Executing command: 'submit'
+DEBUG 2024-09-28 07:14:43.593 UTC: 	 Found CRAB cache file /afs/cern.ch/user/n/nbinnorj/.crab3
+DEBUG 2024-09-28 07:14:43.594 UTC: 	 Will use CRAB plugin ANALYSIS (i.e. will run an analysis job type).
+DEBUG 2024-10-04 19:53:24.107 UTC: 	 CRAB Client version: v3.240621
+DEBUG 2024-10-04 19:53:24.107 UTC: 	 Running on: Linux lxplus813.cern.ch 4.18.0-553.16.1.el8_10.x86_64 #1 SMP Thu Aug 1 04:16:12 EDT 2024 x86_64 x86_64 x86_64 GNU/Linux - Red Hat Enterprise Linux 8.10 (Ootpa)
+DEBUG 2024-10-04 19:53:24.108 UTC: 	 Executing command: 'submit'
+DEBUG 2024-10-04 19:53:24.109 UTC: 	 Found CRAB cache file /afs/cern.ch/user/n/nbinnorj/.crab3
+DEBUG 2024-10-04 19:53:24.125 UTC: 	 Will use CRAB plugin ANALYSIS (i.e. will run an analysis job type).
+DEBUG 2024-10-04 19:54:05.239 UTC: 	 CRAB Client version: v3.240621
+DEBUG 2024-10-04 19:54:05.239 UTC: 	 Running on: Linux lxplus813.cern.ch 4.18.0-553.16.1.el8_10.x86_64 #1 SMP Thu Aug 1 04:16:12 EDT 2024 x86_64 x86_64 x86_64 GNU/Linux - Red Hat Enterprise Linux 8.10 (Ootpa)
+DEBUG 2024-10-04 19:54:05.239 UTC: 	 Executing command: 'submit'
+DEBUG 2024-10-04 19:54:05.239 UTC: 	 Found CRAB cache file /afs/cern.ch/user/n/nbinnorj/.crab3
+DEBUG 2024-10-04 19:54:05.241 UTC: 	 Will use CRAB plugin ANALYSIS (i.e. will run an analysis job type).
+DEBUG 2024-10-04 19:54:41.309 UTC: 	 CRAB Client version: v3.240621
+DEBUG 2024-10-04 19:54:41.310 UTC: 	 Running on: Linux lxplus813.cern.ch 4.18.0-553.16.1.el8_10.x86_64 #1 SMP Thu Aug 1 04:16:12 EDT 2024 x86_64 x86_64 x86_64 GNU/Linux - Red Hat Enterprise Linux 8.10 (Ootpa)
+DEBUG 2024-10-04 19:54:41.310 UTC: 	 Executing command: 'submit'
+DEBUG 2024-10-04 19:54:41.310 UTC: 	 Found CRAB cache file /afs/cern.ch/user/n/nbinnorj/.crab3
+DEBUG 2024-10-04 19:54:41.311 UTC: 	 Will use CRAB plugin ANALYSIS (i.e. will run an analysis job type).
+DEBUG 2024-10-04 22:31:09.127 UTC: 	 CRAB Client version: v3.240621
+DEBUG 2024-10-04 22:31:09.127 UTC: 	 Running on: Linux lxplus812.cern.ch 4.18.0-553.16.1.el8_10.x86_64 #1 SMP Thu Aug 1 04:16:12 EDT 2024 x86_64 x86_64 x86_64 GNU/Linux - Red Hat Enterprise Linux 8.10 (Ootpa)
+DEBUG 2024-10-04 22:31:09.127 UTC: 	 Executing command: 'submit'
+DEBUG 2024-10-04 22:31:09.127 UTC: 	 Found CRAB cache file /afs/cern.ch/user/n/nbinnorj/.crab3
+DEBUG 2024-10-04 22:51:38.092 UTC: 	 CRAB Client version: v3.240621
+DEBUG 2024-10-04 22:51:38.092 UTC: 	 Running on: Linux lxplus812.cern.ch 4.18.0-553.16.1.el8_10.x86_64 #1 SMP Thu Aug 1 04:16:12 EDT 2024 x86_64 x86_64 x86_64 GNU/Linux - Red Hat Enterprise Linux 8.10 (Ootpa)
+DEBUG 2024-10-04 22:51:38.092 UTC: 	 Executing command: 'submit'
+DEBUG 2024-10-04 22:51:38.092 UTC: 	 Found CRAB cache file /afs/cern.ch/user/n/nbinnorj/.crab3
+DEBUG 2024-10-05 08:37:55.841 UTC: 	 CRAB Client version: v3.240621
+DEBUG 2024-10-05 08:37:55.841 UTC: 	 Running on: Linux lxplus819.cern.ch 4.18.0-553.16.1.el8_10.x86_64 #1 SMP Thu Aug 1 04:16:12 EDT 2024 x86_64 x86_64 x86_64 GNU/Linux - Red Hat Enterprise Linux 8.10 (Ootpa)
+DEBUG 2024-10-05 08:37:55.842 UTC: 	 Executing command: 'submit'
+DEBUG 2024-10-05 08:37:55.842 UTC: 	 Found CRAB cache file /afs/cern.ch/user/n/nbinnorj/.crab3
+DEBUG 2024-10-05 08:37:55.843 UTC: 	 Will use CRAB plugin ANALYSIS (i.e. will run an analysis job type).
+DEBUG 2024-10-20 08:38:46.042 UTC: 	 CRAB Client version: v3.240621
+DEBUG 2024-10-20 08:38:46.042 UTC: 	 Running on: Linux lxplus823.cern.ch 4.18.0-553.16.1.el8_10.x86_64 #1 SMP Thu Aug 1 04:16:12 EDT 2024 x86_64 x86_64 x86_64 GNU/Linux - Red Hat Enterprise Linux 8.10 (Ootpa)
+DEBUG 2024-10-20 08:38:46.042 UTC: 	 Executing command: 'submit'
+DEBUG 2024-10-20 08:38:46.043 UTC: 	 Found CRAB cache file /afs/cern.ch/user/n/nbinnorj/.crab3
+DEBUG 2024-10-20 08:38:46.045 UTC: 	 Will use CRAB plugin ANALYSIS (i.e. will run an analysis job type).
+DEBUG 2024-10-20 08:38:47.009 UTC: 	 CRAB Client version: v3.240621
+DEBUG 2024-10-20 08:38:47.010 UTC: 	 Running on: Linux lxplus823.cern.ch 4.18.0-553.16.1.el8_10.x86_64 #1 SMP Thu Aug 1 04:16:12 EDT 2024 x86_64 x86_64 x86_64 GNU/Linux - Red Hat Enterprise Linux 8.10 (Ootpa)
+DEBUG 2024-10-20 08:38:47.010 UTC: 	 Executing command: 'submit'
+DEBUG 2024-10-20 08:38:47.010 UTC: 	 Found CRAB cache file /afs/cern.ch/user/n/nbinnorj/.crab3
+DEBUG 2024-10-20 08:38:47.011 UTC: 	 Will use CRAB plugin ANALYSIS (i.e. will run an analysis job type).

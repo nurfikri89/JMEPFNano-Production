@@ -126,6 +126,7 @@ def PrepJetConstituents(process, saveOnlyPFCandsInJets,
 def SaveChargedHadronPFCandidates(process, applyIso=False, runOnMC=False):
 
   pfChargedHadName = "pfChargedHadronSelected"
+
   pfChargedHadTableName = "customPFChargedHadronCandidateTable"
   pfChargedHadExtTableName = "customPFChargedHadronCandidateExtTable"
   cutStr = f"abs(pdgId()) == 211 && ({pfCHS.cut.value()})"
@@ -147,6 +148,17 @@ def SaveChargedHadronPFCandidates(process, applyIso=False, runOnMC=False):
   if hasattr(process,"finalJetsConstituents"):
     process.finalJetsConstituents.src += cms.VInputTag(cms.InputTag(pfChargedHadName))
   process.customizedJetCandsTask.add(getattr(process, pfChargedHadName))
+
+  pfChargedHadIsoName = "pfChargedHadronSelectedIso"
+  setattr(process, pfChargedHadIsoName, cms.EDProducer("PackedPFCandIsoProducer",
+      packedPFCandidatesSelected = cms.InputTag(pfChargedHadName),
+      packedPFCandidates = cms.InputTag("packedPFCandidates"),
+      maxDeltaR = cms.double(0.5)
+    )
+  )
+  if hasattr(process,"finalJetsConstituents"):
+    process.finalJetsConstituents.src += cms.VInputTag(cms.InputTag(pfChargedHadIsoName))
+  process.customizedJetCandsTask.add(getattr(process, pfChargedHadIsoName))
 
   setattr(process, pfChargedHadTableName, cms.EDProducer("SimpleCandidateFlatTableProducer",
       src = cms.InputTag(pfChargedHadName),
@@ -170,6 +182,9 @@ def SaveChargedHadronPFCandidates(process, applyIso=False, runOnMC=False):
       candidatesMain = process.customPFConstituentsTable.src,
       candidatesSelected = getattr(process,pfChargedHadTableName).src,
       # pc2gp = cms.InputTag("packedPFCandidateToGenAssociation" if runOnMC else "")
+      doIsoCands=cms.bool(True),
+      maxDeltaR=getattr(process,pfChargedHadIsoName).maxDeltaR,
+      nameIsoMap=cms.string(tableName+"ToPFCandForIsoMap"),
     )
   )
   process.customizedJetCandsTask.add(getattr(process ,pfChargedHadExtTableName))
