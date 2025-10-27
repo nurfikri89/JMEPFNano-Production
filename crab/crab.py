@@ -28,14 +28,14 @@ reqNamePrefix = f"MiniToPFNanoV15_v1p0"
 #
 # Set a non-empty string if we want to remake a sample but save in a new USER dataset
 #
-prodversion=""
-# prodversion="-prodv2"
+# prodversion=""
+prodversion="-prodv2"
 #
 # Change this PATH where the crab directories are stored
 # Example: config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects/'
 #
 # crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano/'
-crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano_2/'
+crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano_3/'
 
 # crab_config.General.workArea = '/afs/cern.ch/work/n/nbinnorj/private/crab_projects_pfnano_v14/'
 #

@@ -130,6 +130,9 @@ process = PrepPFNanoAOD(process,
 from JMEPFNano.Production.setupPFNanoV15 import ReducedPFCandInfo
 process = ReducedPFCandInfo(process)
 
+from JMEPFNano.Production.setupPFNanoV15 import AddLostTracks
+process = AddLostTracks(process)
+
 from JMEPFNano.Production.skimDiLepton import SetupSkim_HLTDiMuon
 process = SetupSkim_HLTDiMuon(process)
 

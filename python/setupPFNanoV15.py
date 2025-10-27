@@ -273,9 +273,6 @@ def PrepJetConstituentTables(process, candInputForTable, saveOnlyPFCandsInJets,
       if doPhoton:docStr += " photons "
       if doMuon:docStr += " muons "
 
-  # NOTE:
-  # Need to change "SimplePATCandidateFlatTableProducer" if using >= CMSSW_14_0_6_patch1 (NanoV14 release)
-  #
   process.customPFConstituentsPFNanoTable = cms.EDProducer("SimplePATCandidateFlatTableProducer",
     src = candInputForTable,
     cut = cms.string(""), #we should not filter
@@ -473,25 +470,59 @@ def ReducedPFCandInfo(process):
   process.customPFConstituentsPFNanoTable.variables.phi.precision  = 12
   process.customPFConstituentsPFNanoTable.variables.mass.precision = 12
 
-  process.customPFConstituentsPFNanoTable.variables.dz.precision = 12
+  process.customPFConstituentsPFNanoTable.variables.trkP.precision   = 12
+  process.customPFConstituentsPFNanoTable.variables.trkPt.precision  = 12
+  process.customPFConstituentsPFNanoTable.variables.trkEta.precision = 12
+  process.customPFConstituentsPFNanoTable.variables.trkPhi.precision = 12
+
+  process.customPFConstituentsPFNanoTable.variables.dz.precision    = 12
   process.customPFConstituentsPFNanoTable.variables.dzErr.precision = 12
-  process.customPFConstituentsPFNanoTable.variables.d0.precision = 12
+  process.customPFConstituentsPFNanoTable.variables.d0.precision    = 12
   process.customPFConstituentsPFNanoTable.variables.d0Err.precision = 12
 
-  del process.customPFConstituentsPFNanoTable.variables.trkQuality
-  del process.customPFConstituentsPFNanoTable.variables.trkHighPurity
-  del process.customPFConstituentsPFNanoTable.variables.trkAlgo
+  return process
 
-  del process.customPFConstituentsPFNanoTable.variables.energy
-  del process.customPFConstituentsPFNanoTable.variables.isIsolatedChargedHadron
-  del process.customPFConstituentsPFNanoTable.variables.nHits
-  del process.customPFConstituentsPFNanoTable.variables.nPixelHits
-  del process.customPFConstituentsPFNanoTable.variables.lostInnerHits
-  del process.customPFConstituentsPFNanoTable.variables.lostOuterHits
-  del process.customPFConstituentsPFNanoTable.variables.caloFraction
-  del process.customPFConstituentsPFNanoTable.variables.hcalFraction
-  del process.customPFConstituentsPFNanoTable.variables.rawCaloFraction
-  del process.customPFConstituentsPFNanoTable.variables.rawHcalFraction
+def AddLostTracks(process):
+
+  process.customLostTracksPFNanoTable = cms.EDProducer("SimplePATCandidateFlatTableProducer",
+    src = cms.InputTag("lostTracks"),
+    cut = cms.string(""), #we should not filter
+    name = cms.string("LostTrack"),
+    doc = cms.string("tracks from lostTracks collection"),
+    singleton = cms.bool(False), # the number of entries is variable
+    extension = cms.bool(False), # this is the extension table for the AK8 constituents
+    variables = cms.PSet(CandVars,
+      isStandAloneMuon = Var("isStandAloneMuon()", bool, doc="isStandAloneMuon()"),
+      isGlobalMuon = Var("isGlobalMuon()", bool, doc="isGlobalMuon()"),
+      trkQuality = Var("?hasTrackDetails()?bestTrack().qualityMask():0", int, doc="track quality mask"),
+      trkHighPurity = Var("trackHighPurity()", bool, doc="is trackHighPurity"),
+      trkAlgo = Var("?hasTrackDetails()?bestTrack().algo():-1", int, doc="track algorithm"),
+      dz = Var("?hasTrackDetails()?dz():-1", float, doc="dz", precision=15),
+      dzErr = Var("?hasTrackDetails()?dzError():-1", float, doc="dz err", precision=15),
+      d0 = Var("?hasTrackDetails()?dxy():-1", float, doc="dxy", precision=15),
+      d0Err = Var("?hasTrackDetails()?dxyError():-1", float, doc="dxy err", precision=15),
+      nHits = Var("numberOfHits()", int, doc="numberOfHits()"),
+      nPixelHits = Var("numberOfPixelHits()", int, doc="numberOfPixelHits()"),
+      lostInnerHits = Var("lostInnerHits()", int, doc="lost inner hits. -1: validHitInFirstPixelBarrelLayer, 0: noLostInnerHits, 1: oneLostInnerHit, 2: moreLostInnerHits"),
+      lostOuterHits = Var("?hasTrackDetails()?bestTrack().hitPattern().numberOfLostHits('MISSING_OUTER_HITS'):0", int, doc="lost outer hits"),
+      trkChi2 = Var("?hasTrackDetails()?bestTrack().normalizedChi2():-1", float, doc="normalized trk chi2", precision=15),
+      pvAssocQuality = Var("pvAssociationQuality()", int, doc="primary vertex association quality (NotReconstructedPrimary = 0, OtherDeltaZ = 1, CompatibilityBTag = 4, CompatibilityDz = 5, UsedInFitLoose = 6, UsedInFitTight = 7)"),
+      vertexRef = Var("?vertexRef().isNonnull()?vertexRef().key():-1", int, doc="vertexRef().key()"),
+      fromPV0 = Var("fromPV()", int, doc="PV0 association (NoPV = 0, PVLoose = 1, PVTight = 2, PVUsedInFit = 3)"),
+      vtxChi2 = Var("?hasTrackDetails()?vertexChi2():-1", float, doc="vertex chi2",precision=15),
+    )
+  )
+  process.customizedJetCandsTask.add(process.customLostTracksPFNanoTable)
+  #keep maximum precision for 4-vector
+  process.customLostTracksPFNanoTable.variables.pt.precision   = 12
+  process.customLostTracksPFNanoTable.variables.eta.precision  = 12
+  process.customLostTracksPFNanoTable.variables.phi.precision  = 12
+  process.customLostTracksPFNanoTable.variables.mass.precision = 12
+
+  process.customLostTracksPFNanoTable.variables.dz.precision    = 12
+  process.customLostTracksPFNanoTable.variables.dzErr.precision = 12
+  process.customLostTracksPFNanoTable.variables.d0.precision    = 12
+  process.customLostTracksPFNanoTable.variables.d0Err.precision = 12
 
   return process
 
