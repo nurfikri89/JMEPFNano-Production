@@ -23,6 +23,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1),
+    # input = cms.untracked.int32(100),
     output = cms.optional.untracked.allowed(cms.int32,cms.PSet)
 )
 
@@ -116,7 +117,6 @@ process = nanoAOD_customizeCommon(process)
 
 # End of customisation functions
 
-
 from JMEPFNano.Production.custom_pf_nanoV15_cff import PrepPFNanoAOD
 process = PrepPFNanoAOD(process,
   runOnMC=True,
@@ -136,6 +136,9 @@ process = PrepPFNanoAOD(process,
 )
 from JMEPFNano.Production.setupPFNanoV15 import ReducedPFCandInfo
 process = ReducedPFCandInfo(process)
+
+from JMEPFNano.Production.setupPFNanoV15 import AddLostTracks
+process = AddLostTracks(process)
 
 from JMEPFNano.Production.setupPFNanoV15 import ReducedGenPartCandInfo
 process = ReducedGenPartCandInfo(process)
